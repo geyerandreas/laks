@@ -45,6 +45,21 @@ pub struct Register {
     pub password: String,
 }
 
+#[derive(Debug, Serialize, ToSchema)]
+struct RegisterResponse {
+    pub email: String,
+    pub name: String,
+}
+
+impl From<nyxos_db::users::User> for RegisterResponse {
+    fn from(user: nyxos_db::users::User) -> Self {
+        Self {
+            email: user.email,
+            name: user.name,
+        }
+    }
+}
+
 /// Login
 #[utoipa::path(
     post,
@@ -131,14 +146,18 @@ pub async fn status(cookies: Cookies, State(jwt): State<JwtService>) -> StatusCo
     tag = "auth",
     request_body = Register,
     responses(
-        (status = 201, description = "User created successfully"),
+        (
+            status = 201,
+            description = "User created successfully",
+            body = RegisterResponse
+        ),
         (status = 500, description = "Internal server error")
     ),
 )]
 async fn register(
     State(pool): State<SqlitePool>,
     Json(payload): Json<Register>,
-) -> Result<(StatusCode, Json<nyxos_db::users::User>), StatusCode> {
+) -> Result<(StatusCode, Json<RegisterResponse>), StatusCode> {
     nyxos_db::users::create(
         &pool,
         &nyxos_db::users::UserCreate {
@@ -149,7 +168,7 @@ async fn register(
         },
     )
     .await
-    .map(|user| (StatusCode::CREATED, Json(user)))
+    .map(|user| (StatusCode::CREATED, Json(RegisterResponse::from(user))))
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
