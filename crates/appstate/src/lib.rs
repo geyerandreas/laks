@@ -1,13 +1,12 @@
 use axum::extract::FromRef;
 use nyxos_auth::jwt::JwtService;
 use nyxos_storage::file::FileStorage;
-use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: sqlx::SqlitePool,
     pub jwt: JwtService,
-    pub storage: Arc<FileStorage>,
+    pub storage: FileStorage,
 }
 
 impl FromRef<AppState> for sqlx::SqlitePool {
@@ -22,7 +21,7 @@ impl FromRef<AppState> for JwtService {
     }
 }
 
-impl FromRef<AppState> for Arc<FileStorage> {
+impl FromRef<AppState> for FileStorage {
     fn from_ref(input: &AppState) -> Self {
         input.storage.clone()
     }

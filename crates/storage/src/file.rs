@@ -6,6 +6,7 @@ use bytes::Bytes;
 use futures::StreamExt;
 use object_store::{ObjectStore, ObjectStoreExt, PutMode, local::LocalFileSystem, path::Path};
 
+#[derive(Debug, Clone)]
 pub struct FileStorage(LocalFileSystem);
 
 impl FileStorage {

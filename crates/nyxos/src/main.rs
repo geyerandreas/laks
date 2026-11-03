@@ -103,11 +103,7 @@ async fn run_server(settings: ResolvedSettings) {
     let jwt_secret = std::env::var("NYXOS_JWT_SECRET").expect("NYXOS_JWT_SECRET must be set");
     let jwt = JwtService::new(jwt_secret);
 
-    let app = routes::create_router(AppState {
-        pool,
-        jwt,
-        storage: Arc::new(storage),
-    });
+    let app = routes::create_router(AppState { pool, jwt, storage });
 
     let address = SocketAddr::from((settings.settings.local.id, settings.settings.local.port));
 
