@@ -7,9 +7,9 @@ use axum::{
     },
     response::{Html, IntoResponse, Response},
 };
-use nyxos_appstate::AppState;
-use nyxos_common::normalize_name;
-use nyxos_db::registry::Package;
+use laks_appstate::AppState;
+use laks_common::normalize_name;
+use laks_db::registry::Package;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -58,7 +58,7 @@ struct PackageFileJson {
 }
 
 impl PackageFileJson {
-    fn from_package_file(value: nyxos_db::registry::PackageFile, package_name: &str) -> Self {
+    fn from_package_file(value: laks_db::registry::PackageFile, package_name: &str) -> Self {
         let filename = value.filename;
         Self {
             url: format!("/packages/{package_name}/{filename}"),
@@ -97,7 +97,7 @@ async fn get_project(
 ) -> impl IntoResponse {
     let normalized = normalize_name(&project);
 
-    let package = match nyxos_db::registry::get_package(&state.pool, &normalized).await {
+    let package = match laks_db::registry::get_package(&state.pool, &normalized).await {
         Ok(package) => package,
         Err(sqlx::Error::RowNotFound) => return StatusCode::NOT_FOUND.into_response(),
         Err(error) => {
@@ -105,7 +105,7 @@ async fn get_project(
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
     };
-    let files = match nyxos_db::registry::get_package_files(&state.pool, package.id).await {
+    let files = match laks_db::registry::get_package_files(&state.pool, package.id).await {
         Ok(files) => files,
         Err(error) => {
             tracing::error!(%error, package = %normalized, "failed to load package files");
@@ -177,7 +177,7 @@ async fn list_projects(
     State(state): State<AppState>,
     format: ResponseFormat,
 ) -> Result<Response, StatusCode> {
-    let projects: Vec<String> = nyxos_db::registry::get_packages(&state.pool)
+    let projects: Vec<String> = laks_db::registry::get_packages(&state.pool)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
@@ -297,7 +297,7 @@ async fn upload_package(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    nyxos_db::registry::add_package(&state.pool, &name)
+    laks_db::registry::add_package(&state.pool, &name)
         .await
         .map(|package| (StatusCode::CREATED, Json(package)))
         .map_err(|error| {

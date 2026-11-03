@@ -1,5 +1,5 @@
 [package]
-name = "nyxos-common"
+name = "laks-common"
 version.workspace = true
 edition.workspace = true
 description.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "nyxos-db"
+name = "laks-db"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
@@ -13,6 +13,6 @@ sqlx.workspace = true
 thiserror.workspace = true
 utoipa.workspace = true
 
-nyxos-auth.workspace = true
-nyxos-common.workspace = true
-nyxos-settings.workspace = true
+laks-auth.workspace = true
+laks-common.workspace = true
+laks-settings.workspace = true

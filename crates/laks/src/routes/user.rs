@@ -1,8 +1,8 @@
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
-use nyxos_appstate::AppState;
-use nyxos_db::users::{User, UserUpdate};
+use laks_appstate::AppState;
+use laks_db::users::{User, UserUpdate};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
@@ -40,7 +40,7 @@ pub struct UserCreate {
     pub is_admin: bool,
 }
 
-impl From<UserCreate> for nyxos_db::users::UserCreate {
+impl From<UserCreate> for laks_db::users::UserCreate {
     fn from(value: UserCreate) -> Self {
         Self {
             name: value.name,
@@ -62,7 +62,7 @@ impl From<UserCreate> for nyxos_db::users::UserCreate {
     ),
 )]
 async fn list_users(State(pool): State<SqlitePool>) -> Result<Json<Vec<UserPublic>>, StatusCode> {
-    let users = nyxos_db::users::get_all(&pool)
+    let users = laks_db::users::get_all(&pool)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
@@ -84,9 +84,9 @@ async fn add(
     State(pool): State<SqlitePool>,
     Json(payload): Json<UserCreate>,
 ) -> Result<(StatusCode, Json<UserPublic>), StatusCode> {
-    let user = nyxos_db::users::UserCreate::from(payload);
+    let user = laks_db::users::UserCreate::from(payload);
 
-    let x = nyxos_db::users::create(&pool, &user)
+    let x = laks_db::users::create(&pool, &user)
         .await
         // .map(|user| (StatusCode::CREATED, Json(user)))
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -142,7 +142,7 @@ pub async fn get(
     State(pool): State<SqlitePool>,
     Path(id): Path<i32>,
 ) -> Result<Json<UserPublic>, StatusCode> {
-    let user = nyxos_db::users::get(&pool, id)
+    let user = laks_db::users::get(&pool, id)
         .await
         .map_err(|_| StatusCode::NOT_FOUND)?;
 
@@ -167,7 +167,7 @@ pub async fn update(
     Path(id): Path<i32>,
     Json(payload): Json<UserUpdate>,
 ) -> Result<Json<UserPublic>, StatusCode> {
-    let user = nyxos_db::users::update(&pool, id, &payload)
+    let user = laks_db::users::update(&pool, id, &payload)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

@@ -100,14 +100,14 @@ scroll_anchor = "auto"
 # A custom kill command such as the one suggested below is frequently needed to kill
 # long running programs (uncomment it if you need it)
 [jobs.run-long]
-command = ["cargo", "run", "-p", "nyxos", "start"]
+command = ["cargo", "run", "-p", "laks", "start"]
 need_stdout = true
 allow_warnings = true
 background = false
 on_change_strategy = "kill_then_restart"
 # kill = ["pkill", "-TERM", "-P"]
 scroll_anchor = "auto"
-env = { NYXOS_JWT_SECRET = "a-development-secret-that-is-long-enough" }
+env = { LAKS_JWT_SECRET = "a-development-secret-that-is-long-enough" }
 
 # This parameterized job runs the example of your choice, as soon
 # as the code compiles.

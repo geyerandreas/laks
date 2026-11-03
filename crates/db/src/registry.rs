@@ -1,5 +1,5 @@
 use crate::error::Result;
-use nyxos_common::normalize_name;
+use laks_common::normalize_name;
 use serde::Serialize;
 use sqlx::{Error, SqlitePool, prelude::FromRow};
 

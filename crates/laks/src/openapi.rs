@@ -2,7 +2,7 @@ use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(info(
-    title = "nyxos API",
+    title = "laks API",
     version = "0.1.0",
     description = "Self-hosted Python registry"
 ))]

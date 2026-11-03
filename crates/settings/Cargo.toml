@@ -1,5 +1,5 @@
 [package]
-name = "nyxos-settings"
+name = "laks-settings"
 version.workspace = true
 edition.workspace = true
 description.workspace = true

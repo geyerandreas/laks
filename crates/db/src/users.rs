@@ -1,6 +1,6 @@
 use crate::error::Result;
-use nyxos_auth::password::hash_password;
-use nyxos_settings::setup::Setup;
+use laks_auth::password::hash_password;
+use laks_settings::setup::Setup;
 use serde::Deserialize;
 use sqlx::Error;
 use sqlx::SqlitePool;

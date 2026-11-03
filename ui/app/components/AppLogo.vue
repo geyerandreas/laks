@@ -1,3 +1,3 @@
 <template>
-  <h1>NYXOS</h1>
+  <h1>LAKS</h1>
 </template>

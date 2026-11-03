@@ -5,7 +5,7 @@ use std::{fs, path::PathBuf};
 use crate::settings::Settings;
 
 #[derive(Parser)]
-#[command(name = "nyxos", version, about)]
+#[command(name = "laks", version, about)]
 pub struct Cli {
     /// Path to configuration file
     #[arg(id = "config", short = 'c', long = "config", global = true)]
@@ -29,7 +29,7 @@ pub enum Commands {
 pub enum ConfigCommands {
     /// Initialize a new configuration file with default values
     Init {
-        /// Output file path (default: ./nyxos.toml)
+        /// Output file path (default: ./laks.toml)
         #[arg(short = 'o', long = "output")]
         output: Option<PathBuf>,
     },
@@ -63,7 +63,7 @@ pub fn parse_cli() -> CliResult {
         Some(Commands::Config {
             command: ConfigCommands::Init { output },
         }) => CliResult::InitConfig {
-            output: output.unwrap_or_else(|| PathBuf::from("nyxos.toml")),
+            output: output.unwrap_or_else(|| PathBuf::from("laks.toml")),
         },
         Some(Commands::Config {
             command: ConfigCommands::Show {},

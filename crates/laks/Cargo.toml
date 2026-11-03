@@ -1,5 +1,5 @@
 [package]
-name = "nyxos"
+name = "laks"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
@@ -24,9 +24,9 @@ utoipa.workspace = true
 utoipa-axum.workspace = true
 utoipa-swagger-ui.workspace = true
 
-nyxos-appstate.workspace = true
-nyxos-auth.workspace = true
-nyxos-common.workspace = true
-nyxos-db.workspace = true
-nyxos-settings.workspace = true
-nyxos-storage.workspace = true
+laks-appstate.workspace = true
+laks-auth.workspace = true
+laks-common.workspace = true
+laks-db.workspace = true
+laks-settings.workspace = true
+laks-storage.workspace = true

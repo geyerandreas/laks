@@ -8,16 +8,16 @@ COPY Cargo.toml Cargo.lock ./
 
 COPY crates/ crates/
 
-RUN cargo build --locked --release --package nyxos
+RUN cargo build --locked --release --package laks
 
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/nyxos /app/nyxos
+COPY --from=builder /app/target/release/laks /app/laks
 
 EXPOSE 3000
 
-ENTRYPOINT [ "/app/nyxos" ]
+ENTRYPOINT [ "/app/laks" ]
 
 CMD ["start"]

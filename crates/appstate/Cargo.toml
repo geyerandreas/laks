@@ -1,5 +1,5 @@
 [package]
-name = "nyxos-appstate"
+name = "laks-appstate"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
@@ -10,5 +10,5 @@ license.workspace = true
 axum.workspace = true
 sqlx.workspace = true
 
-nyxos-auth.workspace = true
-nyxos-storage.workspace = true
+laks-auth.workspace = true
+laks-storage.workspace = true

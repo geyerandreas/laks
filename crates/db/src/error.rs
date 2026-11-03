@@ -1,4 +1,4 @@
-use nyxos_auth::error::AuthError;
+use laks_auth::error::AuthError;
 
 pub type Result<T, E = DatabaseError> = std::result::Result<T, E>;
 

@@ -19,6 +19,6 @@ defineProps<{
     <span
       v-if="!collapsed"
       class="truncate"
-    >Nyxos</span>
+    >Laks</span>
   </UButton>
 </template>

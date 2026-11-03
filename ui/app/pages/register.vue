@@ -108,7 +108,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
         <UAuthForm
           :schema="schema"
           title="Create your account"
-          description="Join nyxos to securely manage and deploy your Python packages."
+          description="Join laks to securely manage and deploy your Python packages."
           icon="i-lucide-user-plus"
           :fields="fields"
           :loading="isSubmitting"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 useHead({
-  title: 'Nyxos — private Python packages'
+  title: 'Laks — private Python packages'
 })
 </script>
 
@@ -30,7 +30,7 @@ useHead({
               Ship Python packages with confidence.
             </h1>
             <p class="mt-6 max-w-xl text-lg leading-8 text-muted">
-              Nyxos gives your team a secure, focused home for the packages you build and the software you ship.
+              Laks gives your team a secure, focused home for the packages you build and the software you ship.
             </p>
             <div class="mt-8 flex flex-wrap items-center gap-3">
               <UButton
@@ -62,7 +62,7 @@ useHead({
                   <span class="ml-auto font-mono text-xs text-zinc-500">terminal</span>
                 </div>
                 <p class="font-mono text-zinc-500">
-                  $ pip install nyxos-client
+                  $ pip install laks-client
                 </p>
                 <p class="mt-4 font-mono">
                   <span class="text-emerald-400">✓</span>
@@ -76,7 +76,7 @@ useHead({
                     Your private index
                   </p>
                   <p class="mt-2 font-mono text-primary-300">
-                    packages.nyxos.dev/simple/
+                    packages.laks.dev/simple/
                   </p>
                 </div>
               </div>

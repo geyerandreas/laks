@@ -1,13 +1,13 @@
-use nyxos_appstate::AppState;
-use nyxos_auth::jwt::JwtService;
-use nyxos_db::users::{User, UserCreate, create};
-use nyxos_settings::{
+use laks_appstate::AppState;
+use laks_auth::jwt::JwtService;
+use laks_db::users::{User, UserCreate, create};
+use laks_settings::{
     cli::{CliResult, ResolvedSettings, parse_cli},
     log::{Log, LogFormat},
     settings::Settings,
     setup::Setup,
 };
-use nyxos_storage::file::FileStorage;
+use laks_storage::file::FileStorage;
 use sqlx::SqlitePool;
 use std::{
     net::SocketAddr,
@@ -91,7 +91,7 @@ async fn run_server(settings: ResolvedSettings) {
         .await
         .expect("successful database migration");
 
-    if nyxos_db::users::no_user_exists(&pool)
+    if laks_db::users::no_user_exists(&pool)
         .await
         .expect("users table should be searchable")
     {
@@ -100,7 +100,7 @@ async fn run_server(settings: ResolvedSettings) {
             .expect("initial admin account should be created");
     }
 
-    let jwt_secret = std::env::var("NYXOS_JWT_SECRET").expect("NYXOS_JWT_SECRET must be set");
+    let jwt_secret = std::env::var("LAKS_JWT_SECRET").expect("LAKS_JWT_SECRET must be set");
     let jwt = JwtService::new(jwt_secret);
 
     let app = routes::create_router(AppState { pool, jwt, storage });
@@ -175,6 +175,6 @@ fn init_storage(settings: &ResolvedSettings) -> FileStorage {
 pub async fn add_initial_admin_account(
     pool: &SqlitePool,
     user: Setup,
-) -> nyxos_db::error::Result<User> {
+) -> laks_db::error::Result<User> {
     create(pool, &UserCreate::from(user)).await
 }

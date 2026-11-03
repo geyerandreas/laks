@@ -1,5 +1,5 @@
 [package]
-name = "nyxos-storage"
+name = "laks-storage"
 version.workspace = true
 edition.workspace = true
 description.workspace = true

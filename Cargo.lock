@@ -1260,6 +1260,98 @@ dependencies = [
 ]
 
 [[package]]
+name = "laks"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "clap",
+ "cookie",
+ "hex",
+ "laks-appstate",
+ "laks-auth",
+ "laks-common",
+ "laks-db",
+ "laks-settings",
+ "laks-storage",
+ "serde",
+ "sha2 0.11.1",
+ "sqlx",
+ "tokio",
+ "toml",
+ "tower-cookies",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "utoipa",
+ "utoipa-axum",
+ "utoipa-swagger-ui",
+]
+
+[[package]]
+name = "laks-appstate"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "laks-auth",
+ "laks-storage",
+ "sqlx",
+]
+
+[[package]]
+name = "laks-auth"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "chrono",
+ "jsonwebtoken",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "laks-common"
+version = "0.1.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "laks-db"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "laks-auth",
+ "laks-common",
+ "laks-settings",
+ "serde",
+ "sqlx",
+ "thiserror",
+ "utoipa",
+]
+
+[[package]]
+name = "laks-settings"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde",
+ "toml",
+ "tracing",
+]
+
+[[package]]
+name = "laks-storage"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "object_store",
+ "tempfile",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1479,98 +1571,6 @@ checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
  "libm",
-]
-
-[[package]]
-name = "nyxos"
-version = "0.1.0"
-dependencies = [
- "axum",
- "clap",
- "cookie",
- "hex",
- "nyxos-appstate",
- "nyxos-auth",
- "nyxos-common",
- "nyxos-db",
- "nyxos-settings",
- "nyxos-storage",
- "serde",
- "sha2 0.11.1",
- "sqlx",
- "tokio",
- "toml",
- "tower-cookies",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "utoipa",
- "utoipa-axum",
- "utoipa-swagger-ui",
-]
-
-[[package]]
-name = "nyxos-appstate"
-version = "0.1.0"
-dependencies = [
- "axum",
- "nyxos-auth",
- "nyxos-storage",
- "sqlx",
-]
-
-[[package]]
-name = "nyxos-auth"
-version = "0.1.0"
-dependencies = [
- "argon2",
- "chrono",
- "jsonwebtoken",
- "serde",
- "thiserror",
-]
-
-[[package]]
-name = "nyxos-common"
-version = "0.1.0"
-dependencies = [
- "regex",
-]
-
-[[package]]
-name = "nyxos-db"
-version = "0.1.0"
-dependencies = [
- "axum",
- "nyxos-auth",
- "nyxos-common",
- "nyxos-settings",
- "serde",
- "sqlx",
- "thiserror",
- "utoipa",
-]
-
-[[package]]
-name = "nyxos-settings"
-version = "0.1.0"
-dependencies = [
- "clap",
- "serde",
- "toml",
- "tracing",
-]
-
-[[package]]
-name = "nyxos-storage"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "object_store",
- "tempfile",
- "thiserror",
- "tokio",
 ]
 
 [[package]]

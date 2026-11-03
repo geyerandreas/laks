@@ -19,7 +19,7 @@ onMounted(() => {
             class="size-4"
           />
         </span>
-        <span>Nyxos</span>
+        <span>Laks</span>
       </NuxtLink>
 
       <UButton

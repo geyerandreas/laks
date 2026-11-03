@@ -1,6 +1,6 @@
 use axum::extract::FromRef;
-use nyxos_auth::jwt::JwtService;
-use nyxos_storage::file::FileStorage;
+use laks_auth::jwt::JwtService;
+use laks_storage::file::FileStorage;
 
 #[derive(Clone)]
 pub struct AppState {

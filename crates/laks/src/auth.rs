@@ -2,7 +2,7 @@ use axum::{
     extract::{FromRef, FromRequestParts},
     http::StatusCode,
 };
-use nyxos_auth::jwt::JwtService;
+use laks_auth::jwt::JwtService;
 use tower_cookies::Cookies;
 
 pub struct AuthUser {

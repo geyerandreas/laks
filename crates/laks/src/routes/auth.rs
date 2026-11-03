@@ -1,7 +1,7 @@
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use cookie::time::SignedDuration;
-use nyxos_appstate::AppState;
-use nyxos_auth::{jwt::JwtService, password::verify_password};
+use laks_appstate::AppState;
+use laks_auth::{jwt::JwtService, password::verify_password};
 use serde::{Deserialize, Serialize};
 use sqlx::{SqlitePool, prelude::FromRow};
 use tower_cookies::{Cookie, Cookies};
@@ -51,8 +51,8 @@ struct RegisterResponse {
     pub name: String,
 }
 
-impl From<nyxos_db::users::User> for RegisterResponse {
-    fn from(user: nyxos_db::users::User) -> Self {
+impl From<laks_db::users::User> for RegisterResponse {
+    fn from(user: laks_db::users::User) -> Self {
         Self {
             email: user.email,
             name: user.name,
@@ -158,9 +158,9 @@ async fn register(
     State(pool): State<SqlitePool>,
     Json(payload): Json<Register>,
 ) -> Result<(StatusCode, Json<RegisterResponse>), StatusCode> {
-    nyxos_db::users::create(
+    laks_db::users::create(
         &pool,
-        &nyxos_db::users::UserCreate {
+        &laks_db::users::UserCreate {
             is_admin: false,
             name: payload.name,
             email: payload.email,
@@ -183,5 +183,5 @@ fn auth_cookie(value: &str, max_age: SignedDuration) -> Cookie<'static> {
 }
 
 fn cookie_secure() -> bool {
-    std::env::var("NYXOS_COOKIE_SECURE").is_ok_and(|value| value.eq_ignore_ascii_case("true"))
+    std::env::var("LAKS_COOKIE_SECURE").is_ok_and(|value| value.eq_ignore_ascii_case("true"))
 }
