@@ -1,4 +1,4 @@
-name: Rust CI
+name: Publish crates.io
 
 on:
   workflow_dispatch:
