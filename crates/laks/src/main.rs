@@ -86,7 +86,7 @@ async fn run_server(settings: ResolvedSettings) {
         .await
         .expect("successful database connect");
 
-    sqlx::migrate!("../../migrations")
+    sqlx::migrate!("./migrations")
         .run(&pool)
         .await
         .expect("successful database migration");
