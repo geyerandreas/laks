@@ -3,6 +3,10 @@ name: Publish crates.io
 on:
   workflow_dispatch:
 
+concurrency:
+  group: publish-crates
+  cancel-in-progress: false
+
 env:
   CARGO_TERM_COLOR: always
   CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO }}
@@ -13,17 +17,18 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Login into crates.io
-        run: cargo login
+      - name: Build workspace in release mode
+        run: cargo build --workspace --locked --verbose --release
 
-      - name: Build binaries in "release" mode
-        run: cargo build --verbose --release
+      - name: Run workspace tests
+        run: cargo test --workspace --locked --verbose
 
-      - name: "Publish to crates.io"
-        run: cargo publish
+      - name: Publish workspace to crates.io
+        run: cargo publish --workspace --locked --verbose
