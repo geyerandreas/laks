@@ -8,7 +8,7 @@ pub struct Registry {
 impl Default for Registry {
     fn default() -> Self {
         Self {
-            data_directory: String::from("./"),
+            data_directory: String::from("./storage"),
         }
     }
 }
