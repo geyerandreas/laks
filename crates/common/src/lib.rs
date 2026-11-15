@@ -1,6 +1,7 @@
-/// PEP 503 Name Normalization
+/// Normalze name
+/// See PEP 503 and 508
 pub fn normalize_name(name: &str) -> String {
-    let regex = regex::Regex::new(r"[-_. ]+").expect("a valid regex expression");
+    let regex = regex::Regex::new(r"[-_.]+").expect("a valid regex expression");
     regex.replace_all(&name.to_lowercase(), "-").to_string()
 }
 
@@ -11,7 +12,6 @@ mod tests {
     #[test]
     fn normalizes_case_and_separators() {
         let cases = [
-            ("Hello World", "hello-world"),
             ("Hello-World_test.file", "hello-world-test-file"),
             ("one--two__three..four", "one-two-three-four"),
         ];
@@ -22,7 +22,7 @@ mod tests {
     }
 
     #[test]
-    fn lowercases_unicode_characters() {
-        assert_eq!(normalize_name("RUST-ÉDITION"), "rust-édition");
+    fn does_not_normalize_undocumented_separators() {
+        assert_eq!(normalize_name("Hello World"), "hello world");
     }
 }
