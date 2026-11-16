@@ -51,7 +51,7 @@ impl FromStr for FileFormatVersion {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Metadata {
-    /// Version of the file format; legal values are “1.0”, “1.1”, “1.2”, “2.1”, “2.2”, “2.3”, “2.4”, “2.5”, and “2.6”.
+    /// Version of the file format.
     pub metadata_version: FileFormatVersion,
     /// The name of the distribution.
     pub name: String,
