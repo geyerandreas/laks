@@ -27,4 +27,7 @@ pub enum Error {
     /// Multiple metadata files found
     #[error("found multiple metadata files: {0:?}")]
     MultipleMetadataFiles(Vec<String>),
+    /// Invalid metadata file format version
+    #[error("invalid metadata file format version found: {0}")]
+    InvalidMetadataFileFormatVersion(String),
 }
