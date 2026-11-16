@@ -5,10 +5,54 @@ use serde::{Deserialize, Serialize};
 
 use crate::pkginfo::error::Error;
 
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
+pub enum FileFormatVersion {
+    #[serde(rename = "1.0")]
+    V1_0,
+    #[serde(rename = "1.1")]
+    V1_1,
+    #[serde(rename = "1.2")]
+    V1_2,
+    #[serde(rename = "2.1")]
+    V2_1,
+    #[serde(rename = "2.2")]
+    V2_2,
+    #[serde(rename = "2.3")]
+    V2_3,
+    #[serde(rename = "2.4")]
+    V2_4,
+    #[serde(rename = "2.5")]
+    V2_5,
+    #[default]
+    #[serde(rename = "2.6")]
+    V2_6,
+}
+
+impl FromStr for FileFormatVersion {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "1.0" => Ok(Self::V1_0),
+            "1.1" => Ok(Self::V1_1),
+            "1.2" => Ok(Self::V1_2),
+            "2.1" => Ok(Self::V2_1),
+            "2.2" => Ok(Self::V2_2),
+            "2.3" => Ok(Self::V2_3),
+            "2.4" => Ok(Self::V2_4),
+            "2.5" => Ok(Self::V2_5),
+            "2.6" => Ok(Self::V2_6),
+            _ => Err(Error::InvalidMetadataFileFormatVersion(s.to_owned())),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Metadata {
-    /// Version of the file format; legal values are `1.0`, `1.1`, `1.2`, `2.1` and `2.2`.
-    pub metadata_version: String,
+    /// Version of the file format.
+    pub metadata_version: FileFormatVersion,
     /// The name of the distribution.
     pub name: String,
     /// A string containing the distribution’s version number.
@@ -131,9 +175,10 @@ impl Metadata {
                 .collect();
             values
         };
-        let metadata_version = headers
+        let metadata_version: FileFormatVersion = headers
             .get_first_value("Metadata-Version")
-            .ok_or(Error::FieldNotFound("Metadata-Version"))?;
+            .ok_or(Error::FieldNotFound("Metadata-Version"))?
+            .parse()?;
         let name = headers
             .get_first_value("Name")
             .ok_or(Error::FieldNotFound("Name"))?;
@@ -212,6 +257,7 @@ impl FromStr for Metadata {
 #[cfg(test)]
 mod tests {
     use super::Error;
+    use super::FileFormatVersion;
     use super::Metadata;
 
     #[test]
@@ -226,7 +272,7 @@ mod tests {
 
         let s = "Metadata-Version: 1.0\nName: asdf\nVersion: 1.0";
         let meta = Metadata::parse(s.as_bytes()).unwrap();
-        assert_eq!(meta.metadata_version, "1.0");
+        assert_eq!(meta.metadata_version, FileFormatVersion::V1_0);
         assert_eq!(meta.name, "asdf");
         assert_eq!(meta.version, "1.0");
 
