@@ -8,8 +8,18 @@ license.workspace = true
 
 [dependencies]
 bytes.workspace = true
+flate2.workspace = true
+fs-err.workspace = true
 futures.workspace = true
+mailparse.workspace = true
 object_store.workspace = true
+rfc2047-decoder.workspace = true
+serde.workspace = true
+tar.workspace = true
 tempfile.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
+zip.workspace = true
+
+[dev-dependencies]
+serde_json = { version = "1.0.154" }

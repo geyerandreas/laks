@@ -19,14 +19,19 @@ bytes = { version = "1.12.1" }
 chrono = { version = "0.4.45", features = ["serde"] }
 clap = { version = "4.6.6", features = ["derive"] }
 cookie = { version = "0.18.2" }
+flate2 = { version = "1.1.11" }
+fs-err = { version = "3.3.2" }
 futures = { version = "0.3.34" }
 hex = { version = "0.4.3" }
 jsonwebtoken = { version = "11.0.0", features = ["rust_crypto"] }
+mailparse = { version = "0.18.0" }
 object_store = { version = "0.14.1" }
 regex = { version = "1.13.1" }
+rfc2047-decoder = { version = "1.1.2" }
 serde = { version = "1.0.229", features = ["derive"] }
 sha2 = { version = "0.11.1" }
 sqlx = { version = "0.9.0", features = ["runtime-tokio", "sqlite"] }
+tar = { version = "0.4.46" }
 tempfile = { version = "3.27.0" }
 thiserror = { version = "2.0.20" }
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "signal"] }
@@ -39,6 +44,7 @@ utoipa = { version = "6.0.0", features = ["axum_extras", "chrono"] }
 utoipa-axum = { version = "0.3.0" }
 utoipa-swagger-ui = { version = "10.0.1", features = ["axum"] }
 uuid = { version = "1.26.0", features = ["v4"] }
+zip = { version = "9.6.0", default-features = false, features = ["deflate"] }
 
 laks-appstate = { path = "./crates/appstate/", version = "0.1.0" }
 laks-auth = { path = "./crates/auth", version = "0.1.0" }
