@@ -1,171 +1,196 @@
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui'
+import type { TableColumn } from "@nuxt/ui";
 
-const config = useRuntimeConfig()
-const users = ref<User[]>([])
-const isLoading = ref(true)
-const isSaving = ref(false)
-const isDeleting = ref(false)
-const isModalOpen = ref(false)
-const isDeleteModalOpen = ref(false)
-const userToDelete = ref<User | null>(null)
-const form = ref<UserForm>({ name: '', email: '', password: '' })
-const editingUser = ref<User | null>(null)
-const errorMessage = ref('')
+const config = useRuntimeConfig();
+const users = ref<User[]>([]);
+const isLoading = ref(true);
+const isSaving = ref(false);
+const isDeleting = ref(false);
+const isModalOpen = ref(false);
+const isDeleteModalOpen = ref(false);
+const userToDelete = ref<User | null>(null);
+const form = ref<UserForm>({ name: "", email: "", password: "" });
+const editingUser = ref<User | null>(null);
+const errorMessage = ref("");
 
 interface User {
-  id: number
-  name: string
-  email: string
+  id: number;
+  name: string;
+  email: string;
 }
 
 interface UserForm {
-  name: string
-  email: string
-  password: string
+  name: string;
+  email: string;
+  password: string;
 }
 
 const columns: TableColumn<User>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'email', header: 'Email address' },
-  { id: 'actions', header: '' }
-]
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "email", header: "Email address" },
+  { id: "actions", header: "" },
+];
 
 async function loadUsers() {
-  isLoading.value = true
-  errorMessage.value = ''
+  isLoading.value = true;
+  errorMessage.value = "";
 
   try {
-    const response = await $fetch<User[]>('/api/v1/users', {
-      baseURL: config.public.apiBase
-    })
-    users.value = response
+    const response = await $fetch<User[]>("/api/v1/users", {
+      baseURL: config.public.apiBase,
+    });
+    users.value = response;
   } catch (error: unknown) {
-    errorMessage.value = getErrorMessage(error, 'Unable to load users. Please try again.')
+    errorMessage.value = getErrorMessage(
+      error,
+      "Unable to load users. Please try again.",
+    );
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 async function saveUser() {
-  errorMessage.value = ''
+  errorMessage.value = "";
 
   if (!form.value.name.trim() || !form.value.email.trim()) {
-    errorMessage.value = 'Name and email address are required.'
-    return
+    errorMessage.value = "Name and email address are required.";
+    return;
   }
 
   if (!editingUser.value && !form.value.password) {
-    errorMessage.value = 'A password is required for new users.'
-    return
+    errorMessage.value = "A password is required for new users.";
+    return;
   }
 
-  isSaving.value = true
+  isSaving.value = true;
 
   try {
     if (editingUser.value) {
-      const updatedUser = await $fetch<User>(`/api/v1/users/${editingUser.value.id}`, {
-        baseURL: config.public.apiBase,
-        method: 'PATCH',
-        body: {
-          name: form.value.name.trim(),
-          email: form.value.email.trim()
-        }
-      })
-      users.value = users.value.map(user => user.id === updatedUser.id ? updatedUser : user)
+      const updatedUser = await $fetch<User>(
+        `/api/v1/users/${editingUser.value.id}`,
+        {
+          baseURL: config.public.apiBase,
+          method: "PATCH",
+          body: {
+            name: form.value.name.trim(),
+            email: form.value.email.trim(),
+          },
+        },
+      );
+      users.value = users.value.map((user) =>
+        user.id === updatedUser.id ? updatedUser : user,
+      );
     } else {
-      const createdUser = await $fetch<User>('/api/v1/users', {
+      const createdUser = await $fetch<User>("/api/v1/users", {
         baseURL: config.public.apiBase,
-        method: 'POST',
+        method: "POST",
         body: {
           name: form.value.name.trim(),
           email: form.value.email.trim(),
-          password: form.value.password
-        }
-      })
-      users.value = [...users.value, createdUser]
+          password: form.value.password,
+        },
+      });
+      users.value = [...users.value, createdUser];
     }
 
-    isModalOpen.value = false
+    isModalOpen.value = false;
   } catch (error: unknown) {
-    errorMessage.value = getErrorMessage(error, 'Unable to save this user. Please try again.')
+    errorMessage.value = getErrorMessage(
+      error,
+      "Unable to save this user. Please try again.",
+    );
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
 }
 
 async function deleteUser() {
-  if (!userToDelete.value) return
+  if (!userToDelete.value) return;
 
-  isDeleting.value = true
-  errorMessage.value = ''
+  isDeleting.value = true;
+  errorMessage.value = "";
 
   try {
     await $fetch(`/api/v1/users/${userToDelete.value.id}`, {
       baseURL: config.public.apiBase,
-      method: 'DELETE'
-    })
-    users.value = users.value.filter(user => user.id !== userToDelete.value?.id)
-    isDeleteModalOpen.value = false
-    userToDelete.value = null
+      method: "DELETE",
+    });
+    users.value = users.value.filter(
+      (user) => user.id !== userToDelete.value?.id,
+    );
+    isDeleteModalOpen.value = false;
+    userToDelete.value = null;
   } catch (error: unknown) {
-    errorMessage.value = getErrorMessage(error, 'Unable to delete this user. Please try again.')
+    errorMessage.value = getErrorMessage(
+      error,
+      "Unable to delete this user. Please try again.",
+    );
   } finally {
-    isDeleting.value = false
+    isDeleting.value = false;
   }
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const response = error.response
-    if (typeof response === 'object' && response !== null && 'status' in response) {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = error.response;
+    if (
+      typeof response === "object" &&
+      response !== null &&
+      "status" in response
+    ) {
       return response.status === 409
-        ? 'A user with this email already exists.'
-        : fallback
+        ? "A user with this email already exists."
+        : fallback;
     }
   }
 
-  return fallback
+  return fallback;
 }
 
 function openCreateModal() {
-  editingUser.value = null
-  form.value = { name: '', email: '', password: '' }
-  errorMessage.value = ''
-  isModalOpen.value = true
+  editingUser.value = null;
+  form.value = { name: "", email: "", password: "" };
+  errorMessage.value = "";
+  isModalOpen.value = true;
 }
 
 function openDeleteModal(user: User) {
-  userToDelete.value = user
-  errorMessage.value = ''
-  isDeleteModalOpen.value = true
+  userToDelete.value = user;
+  errorMessage.value = "";
+  isDeleteModalOpen.value = true;
 }
 
 function openEditModal(user: User) {
-  editingUser.value = user
-  form.value = { name: user.name, email: user.email, password: '' }
-  errorMessage.value = ''
-  isModalOpen.value = true
+  editingUser.value = user;
+  form.value = { name: user.name, email: user.email, password: "" };
+  errorMessage.value = "";
+  isModalOpen.value = true;
 }
 
 function closeModal() {
   if (!isSaving.value) {
-    isModalOpen.value = false
+    isModalOpen.value = false;
   }
 }
 
-await loadUsers()
+await loadUsers();
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div
+      class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+    >
       <div>
-        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h2
+          class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+        >
           Users
         </h2>
         <p class="text-gray-500 dark:text-gray-400">
-          Create, update, and remove accounts that can access your private repository.
+          Create, update, and remove accounts that can access your private
+          repository.
         </p>
       </div>
       <UButton
@@ -227,13 +252,8 @@ await loadUsers()
 
         <template #empty>
           <div class="py-10 text-center">
-            <UIcon
-              name="i-lucide-users"
-              class="mx-auto size-8 text-dimmed"
-            />
-            <p class="mt-2 font-medium text-highlighted">
-              No users yet
-            </p>
+            <UIcon name="i-lucide-users" class="mx-auto size-8 text-dimmed" />
+            <p class="mt-2 font-medium text-highlighted">No users yet</p>
             <p class="text-sm text-muted">
               Add a user to grant access to your repository.
             </p>
@@ -249,10 +269,14 @@ await loadUsers()
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="font-semibold text-highlighted">
-                  {{ editingUser ? 'Edit user' : 'Add user' }}
+                  {{ editingUser ? "Edit user" : "Add user" }}
                 </h3>
                 <p class="text-sm text-muted">
-                  {{ editingUser ? 'Update this user’s name or email address.' : 'Create an account for a repository user.' }}
+                  {{
+                    editingUser
+                      ? "Update this user’s name or email address."
+                      : "Create an account for a repository user."
+                  }}
                 </p>
               </div>
               <UButton
@@ -265,14 +289,8 @@ await loadUsers()
             </div>
           </template>
 
-          <form
-            class="space-y-4"
-            @submit.prevent="saveUser"
-          >
-            <UFormField
-              label="Name"
-              required
-            >
+          <form class="space-y-4" @submit.prevent="saveUser">
+            <UFormField label="Name" required>
               <UInput
                 v-model="form.name"
                 class="w-full"
@@ -280,10 +298,7 @@ await loadUsers()
                 autocomplete="name"
               />
             </UFormField>
-            <UFormField
-              label="Email address"
-              required
-            >
+            <UFormField label="Email address" required>
               <UInput
                 v-model="form.email"
                 class="w-full"
@@ -292,11 +307,7 @@ await loadUsers()
                 autocomplete="email"
               />
             </UFormField>
-            <UFormField
-              v-if="!editingUser"
-              label="Password"
-              required
-            >
+            <UFormField v-if="!editingUser" label="Password" required>
               <UInput
                 v-model="form.password"
                 class="w-full"
@@ -328,9 +339,7 @@ await loadUsers()
       <template #content>
         <UCard>
           <template #header>
-            <h3 class="font-semibold text-highlighted">
-              Delete user?
-            </h3>
+            <h3 class="font-semibold text-highlighted">Delete user?</h3>
           </template>
           <p class="text-sm text-muted">
             This permanently removes
