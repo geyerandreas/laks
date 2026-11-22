@@ -1,0 +1,46 @@
+{
+    "languages": {
+        "Rust": {
+            "formatter": {
+                "language_server": {
+                    "name": "rust-analyzer",
+                },
+            },
+        },
+        "Vue.js": {
+            "formatter": {
+                "external": {
+                    "command": "ui/node_modules/.bin/oxfmt",
+                    "arguments": ["--stdin-filepath", "{buffer_path}"],
+                },
+            },
+        },
+        "TypeScript": {
+            "formatter": {
+                "external": {
+                    "command": "ui/node_modules/.bin/oxfmt",
+                    "arguments": ["--stdin-filepath", "{buffer_path}"],
+                },
+            },
+        },
+    },
+    "lsp": {
+        "tailwindcss-language-server": {
+            "settings": {
+                "includeLanguages": {
+                    "vue": "html",
+                },
+                "classAttributes": ["class", "ui"],
+                "classFunctions": ["defineAppConfig"],
+                "experimental": {
+                    "classRegex": [
+                        "class=\"([^\"]*)\"",
+                        "class='([^']*)'",
+                        ":class=\"([^\"]*)\"",
+                        ":class='([^']*)'",
+                    ],
+                },
+            },
+        },
+    },
+}
