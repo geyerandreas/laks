@@ -8,7 +8,11 @@
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare",
         "lint": "eslint .",
-        "typecheck": "nuxt typecheck"
+        "lint:fix": "eslint . --fix",
+        "format": "oxfmt",
+        "format:check": "oxfmt --check",
+        "typecheck": "nuxt typecheck",
+        "check": "bun lint && bun format:check && bun typecheck"
     },
     "dependencies": {
         "@iconify-json/lucide": "1.2.134",
@@ -21,8 +25,8 @@
     "devDependencies": {
         "@nuxt/eslint": "1.17.0",
         "eslint": "10.11.0",
-        "eslint-plugin-better-tailwindcss": "4.7.0",
-        "typescript": "7.0.2",
+        "oxfmt": "0.79.0",
+        "typescript": "6",
         "vue-tsc": "3.3.11"
     }
 }
