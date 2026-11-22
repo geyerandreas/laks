@@ -1,23 +1,34 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useColorMode } from '@vueuse/core'
+import { computed } from "vue";
+import { useColorMode } from "@vueuse/core";
 
-const colorMode = useColorMode()
-const themeColor = computed(() => colorMode.value === 'dark' ? '#18181b' : '#ffffff')
+const colorMode = useColorMode();
+const themeColor = computed(() =>
+  colorMode.value === "dark" ? "#101114" : "#ffffff",
+);
 
 useHead({
-  meta: [
-    { name: 'theme-color', content: themeColor }
-  ]
-})
+  link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+  meta: [{ name: "theme-color", content: themeColor }],
+  titleTemplate: (title) =>
+    title
+      ? `${title} - Laks - Python Package Registry `
+      : "Laks - Python Package Registry",
+});
 </script>
 
 <template>
-  <Suspense>
-    <UApp>
+  <UApp>
+    <AppHeader />
+
+    <UMain>
       <NuxtLayout>
-        <NuxtPage />
+        <UContainer class="py-8">
+          <NuxtPage />
+        </UContainer>
       </NuxtLayout>
-    </UApp>
-  </Suspense>
+    </UMain>
+
+    <UFooter />
+  </UApp>
 </template>
