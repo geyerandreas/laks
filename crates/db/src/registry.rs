@@ -49,6 +49,7 @@ pub async fn add_package(pool: &SqlitePool, package_name: &str) -> Result<Packag
     let result = sqlx::query_as(
         "INSERT INTO Packages (name, normalized_name)
         VALUES ($1, $2)
+        ON CONFLICT(normalized_name) DO UPDATE SET name = excluded.name
         RETURNING *",
     )
     .bind(package_name)
@@ -57,4 +58,35 @@ pub async fn add_package(pool: &SqlitePool, package_name: &str) -> Result<Packag
     .await?;
 
     Ok(result)
+}
+
+pub async fn add_package_file(
+    pool: &SqlitePool,
+    package_id: i32,
+    filename: &str,
+    version: &str,
+    requires_python: Option<&str>,
+    sha256_hash: &str,
+    file_path: &str,
+) -> Result<PackageFile> {
+    sqlx::query_as(
+        "INSERT INTO PackageFiles
+            (package_id, filename, version, requires_python, sha256_hash, file_path)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT(package_id, filename) DO UPDATE SET
+            version = excluded.version,
+            requires_python = excluded.requires_python,
+            sha256_hash = excluded.sha256_hash,
+            file_path = excluded.file_path
+        RETURNING *",
+    )
+    .bind(package_id)
+    .bind(filename)
+    .bind(version)
+    .bind(requires_python)
+    .bind(sha256_hash)
+    .bind(file_path)
+    .fetch_one(pool)
+    .await
+    .map_err(Into::into)
 }

@@ -1,6 +1,6 @@
 use axum::{
     Json,
-    extract::{Multipart, Path, Request, State},
+    extract::{Multipart, OriginalUri, Path, Request, State},
     http::{
         HeaderMap, StatusCode,
         header::{self, CONTENT_TYPE},
@@ -153,7 +153,17 @@ async fn get_project(
             .collect::<Vec<_>>()
             .join("\n");
         let html_content = format!(
-            r#"<!DOCTYPE html><html><head><meta name="pypi:repository-version" content="1.0"></head><body><h1>Links for {normalized}</h1>{links}</body></html>"#
+            r#"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="pypi:repository-version" content="1.0">
+</head>
+<body>
+    <h1>Links for {normalized}</h1>
+    {links}
+</body>
+</html>"#
         );
         (
             [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
@@ -176,6 +186,7 @@ async fn get_project(
 async fn list_projects(
     State(state): State<AppState>,
     format: ResponseFormat,
+    original_uri: OriginalUri,
 ) -> Result<Response, StatusCode> {
     let projects: Vec<String> = laks_db::registry::get_packages(&state.pool)
         .await
@@ -203,8 +214,10 @@ async fn list_projects(
             let mut html = String::from("<!DOCTYPE html><html><body>\n");
             for project in projects {
                 html.push_str(&format!(
-                    "<a href=\"/simple/{}/\">{}</a><br>\n",
-                    project, project
+                    "<a href=\"{}{}/\">{}</a>\n",
+                    original_uri.path(),
+                    project,
+                    project
                 ));
             }
             html.push_str("</body></html>");
@@ -222,12 +235,14 @@ pub struct UploadPayload {
     pub name: String,
     /// The package version
     pub version: String,
+    /// Requires python
+    pub requires_python: Option<String>,
 }
 
 /// Upload a package
 #[utoipa::path(
     post,
-    path = "/simple/",
+    path = "/simple/upload",
     tag = "registry",
     request_body(
         content = UploadPayload,
@@ -242,17 +257,18 @@ pub struct UploadPayload {
 async fn upload_package(
     State(state): State<AppState>,
     mut multipart: Multipart,
-) -> Result<(StatusCode, Json<Package>), StatusCode> {
+) -> Result<(StatusCode, Json<Package>), (StatusCode, String)> {
     let mut file_bytes = Vec::new();
     let mut filename = String::new();
     let mut name = String::new();
     let mut version = String::new();
+    let mut requires_python = None;
 
     // Consume multipart stream safely
     while let Some(field) = multipart
         .next_field()
         .await
-        .map_err(|_| StatusCode::BAD_REQUEST)?
+        .map_err(|_| (StatusCode::BAD_REQUEST, "Bad request".to_owned()))?
     {
         let field_name = field.name().unwrap_or("").to_string();
 
@@ -262,21 +278,35 @@ async fn upload_package(
                 file_bytes = field
                     .bytes()
                     .await
-                    .map_err(|_| StatusCode::BAD_REQUEST)?
+                    .map_err(|_| (StatusCode::BAD_REQUEST, "Bad request".to_owned()))?
                     .to_vec();
             }
             "name" => {
-                name = field.text().await.map_err(|_| StatusCode::BAD_REQUEST)?;
+                name = field
+                    .text()
+                    .await
+                    .map_err(|_| (StatusCode::BAD_REQUEST, "Bad request".to_owned()))?;
             }
             "version" => {
-                version = field.text().await.map_err(|_| StatusCode::BAD_REQUEST)?;
+                version = field
+                    .text()
+                    .await
+                    .map_err(|_| (StatusCode::BAD_REQUEST, "Bad request".to_owned()))?;
+            }
+            "requires_python" => {
+                requires_python = Some(
+                    field
+                        .text()
+                        .await
+                        .map_err(|_| (StatusCode::BAD_REQUEST, "Bad request".to_owned()))?,
+                );
             }
             _ => {}
         }
     }
 
     if file_bytes.is_empty() || name.is_empty() || version.is_empty() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err((StatusCode::BAD_REQUEST, "Bad request".to_owned()));
     }
 
     // Compute cryptographic SHA256 integrity hash required by client tools
@@ -287,21 +317,46 @@ async fn upload_package(
 
     // Write metadata to state layer, stream bytes to backend local storage folder path
     // Production note: Store package metadata & files on target block paths or S3
-    let storage_key = format!("{}/{}/{filename}", "storage", normalize_name(&name));
+    let storage_key = format!("{}/{filename}", normalize_name(&name));
     state
         .storage
         .put(&storage_key, file_bytes)
         .await
         .map_err(|error| {
             tracing::error!(%error, key = %storage_key, "failed to store package");
-            StatusCode::INTERNAL_SERVER_ERROR
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to store package".to_owned(),
+            )
         })?;
 
-    laks_db::registry::add_package(&state.pool, &name)
+    let package = laks_db::registry::add_package(&state.pool, &name)
         .await
-        .map(|package| (StatusCode::CREATED, Json(package)))
         .map_err(|error| {
             tracing::error!(%error, package = %name, "failed to add package");
-            StatusCode::INTERNAL_SERVER_ERROR
-        })
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to add package".to_owned(),
+            )
+        })?;
+
+    laks_db::registry::add_package_file(
+        &state.pool,
+        package.id,
+        &filename,
+        &version,
+        requires_python.as_deref(),
+        &hash_result,
+        &storage_key,
+    )
+    .await
+    .map_err(|error| {
+        tracing::error!(%error, package = %name, file = %filename, "failed to add package file");
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to add package file".to_owned(),
+        )
+    })?;
+
+    Ok((StatusCode::CREATED, Json(package)))
 }
