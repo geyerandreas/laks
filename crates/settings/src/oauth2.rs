@@ -3,20 +3,20 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct OAuth2 {
-    /// Enable or disable OAuth2 authentication.
+    /// Enable or disable `OAuth2` authentication.
     pub enabled: bool,
 
-    /// OIDC issuer URL for the OAuth2 provider.
+    /// OIDC issuer URL for the `OAuth2` provider.
     pub issuer_url: Option<String>,
 
-    /// The client ID for the OAuth2 provider.
+    /// The client ID for the `OAuth2` provider.
     pub client_id: Option<String>,
 
-    /// The client secret for the OAuth2 provider.
+    /// The client secret for the `OAuth2` provider.
     #[serde(skip_serializing)]
     pub client_secret: Option<String>,
 
-    /// The scopes to request from the OAuth2 provider.
+    /// The scopes to request from the `OAuth2` provider.
     pub scopes: Vec<String>,
 }
 
@@ -41,7 +41,7 @@ fn default_scopes() -> Vec<String> {
 }
 
 impl OAuth2 {
-    /// Validates the OAuth2 configuration.
+    /// Validates the `OAuth2` configuration.
     pub fn validate(&self) -> Result<(), String> {
         if !self.enabled {
             return Ok(());
