@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
 
-const stats = [
-  { name: "Total Python Packages", value: "14", icon: "i-lucide-package" },
-  { name: "Monthly Downloads", value: "12,482", icon: "i-lucide-download" },
-  { name: "Storage Used", value: "412.5 MB", icon: "i-lucide-database" },
-];
-
 const columns = [
   { accessorKey: "name", header: "Package Name" },
   { accessorKey: "version", header: "Latest Version" },

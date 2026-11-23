@@ -1,13 +1,14 @@
 {
-  "files.associations": {
-    "*.css": "tailwindcss"
-  },
-  "[vue]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "editor.quickSuggestions": {
-    "strings": "on"
-  },
-  "tailwindCSS.classAttributes": ["class", "ui"],
-  "tailwindCSS.classFunctions": ["defineAppConfig"]
+    "files.associations": {
+        "*.css": "tailwindcss",
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+    },
+    "eslint.workingDirectories": ["ui"],
+    "editor.quickSuggestions": {
+        "strings": "on",
+    },
+    "tailwindCSS.classAttributes": ["class", "ui"],
+    "tailwindCSS.classFunctions": ["defineAppConfig"],
 }

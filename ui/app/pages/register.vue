@@ -1,93 +1,98 @@
 <script setup lang="ts">
-import * as z from 'zod'
-import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
+import * as z from "zod";
+import type { FormSubmitEvent, AuthFormField } from "@nuxt/ui";
 
 definePageMeta({
-  layout: false
-})
+  layout: false,
+});
 
-const config = useRuntimeConfig()
-const isSubmitting = ref(false)
-const errorMessage = ref('')
+const config = useRuntimeConfig();
+const isSubmitting = ref(false);
+const errorMessage = ref("");
 
 const fields: AuthFormField[] = [
   {
-    name: 'name',
-    type: 'text',
-    label: 'Full name',
-    placeholder: 'Ada Lovelace',
-    required: true
+    name: "name",
+    type: "text",
+    label: "Full name",
+    placeholder: "Ada Lovelace",
+    required: true,
   },
   {
-    name: 'email',
-    type: 'email',
-    label: 'Email address',
-    placeholder: 'you@example.com',
-    required: true
+    name: "email",
+    type: "email",
+    label: "Email address",
+    placeholder: "you@example.com",
+    required: true,
   },
   {
-    name: 'password',
-    type: 'password',
-    label: 'Password',
-    placeholder: 'Create a secure password',
-    required: true
+    name: "password",
+    type: "password",
+    label: "Password",
+    placeholder: "Create a secure password",
+    required: true,
   },
   {
-    name: 'confirmPassword',
-    type: 'password',
-    label: 'Confirm password',
-    placeholder: 'Enter your password again',
-    required: true
-  }
-]
+    name: "confirmPassword",
+    type: "password",
+    label: "Confirm password",
+    placeholder: "Enter your password again",
+    required: true,
+  },
+];
 
 const schema = z
   .object({
-    name: z.string('Full name is required').trim().min(1, 'Full name is required'),
-    email: z.email('Enter a valid email address'),
-    password: z.string('Password is required').min(8, 'Use at least 8 characters'),
-    confirmPassword: z.string('Please confirm your password')
+    name: z
+      .string("Full name is required")
+      .trim()
+      .min(1, "Full name is required"),
+    email: z.email("Enter a valid email address"),
+    password: z
+      .string("Password is required")
+      .min(8, "Use at least 8 characters"),
+    confirmPassword: z.string("Please confirm your password"),
   })
-  .refine(data => data.password === data.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'Passwords do not match'
-  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
-type Schema = z.output<typeof schema>
+type Schema = z.output<typeof schema>;
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-  errorMessage.value = ''
-  isSubmitting.value = true
+  errorMessage.value = "";
+  isSubmitting.value = true;
 
   try {
-    const { name, email, password } = payload.data
+    const { name, email, password } = payload.data;
 
-    await $fetch('/api/v1/auth/register', {
+    await $fetch("/api/v1/auth/register", {
       baseURL: config.public.apiBase,
-      method: 'POST',
-      body: { name, email, password }
-    })
+      method: "POST",
+      body: { name, email, password },
+    });
 
-    await $fetch('/api/v1/auth/login', {
+    await $fetch("/api/v1/auth/login", {
       baseURL: config.public.apiBase,
-      method: 'POST',
-      credentials: 'include',
-      body: { email, password }
-    })
+      method: "POST",
+      credentials: "include",
+      body: { email, password },
+    });
 
-    await navigateTo('/dashboard')
+    await navigateTo("/dashboard");
   } catch (error: unknown) {
-    const status
-      = typeof error === 'object' && error !== null && 'response' in error
+    const status =
+      typeof error === "object" && error !== null && "response" in error
         ? (error as { response?: { status?: number } }).response?.status
-        : undefined
+        : undefined;
 
-    errorMessage.value
-      = status === 409
-        ? 'An account with this email already exists.'
-        : 'Unable to create your account right now. Please try again.'
+    errorMessage.value =
+      status === 409
+        ? "An account with this email already exists."
+        : "Unable to create your account right now. Please try again.";
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 </script>
@@ -95,13 +100,19 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 <template>
   <div class="min-h-screen bg-elevated/20">
     <AppHeader />
-    <main class="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
+    <main
+      class="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8"
+    >
       <div
         class="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
         aria-hidden="true"
       >
-        <div class="absolute left-1/2 top-0 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-        <div class="absolute -bottom-32 -right-20 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
+        <div
+          class="absolute left-1/2 top-0 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
+        />
+        <div
+          class="absolute -bottom-32 -right-20 h-72 w-72 rounded-full bg-secondary/10 blur-3xl"
+        />
       </div>
 
       <UPageCard class="w-full max-w-lg shadow-xl shadow-primary/5">

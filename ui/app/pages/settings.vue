@@ -19,9 +19,11 @@ const links = [
 </script>
 
 <template>
-  <UNavigationMenu :items="links" variant="pill" highlight class="-mt-8" />
+  <div>
+    <UNavigationMenu :items="links" variant="pill" highlight class="-mt-8" />
 
-  <USeparator class="-mt-px pb-4" />
+    <USeparator class="-mt-px pb-4" />
 
-  <RouterView />
+    <RouterView />
+  </div>
 </template>
