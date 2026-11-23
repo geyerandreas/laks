@@ -1,5 +1,8 @@
 {
     "languages": {
+        "Markdown": {
+            "formatter": "none",
+        },
         "Rust": {
             "formatter": {
                 "language_server": {

@@ -5,6 +5,9 @@
     "[vue]": {
         "editor.defaultFormatter": "oxc.oxc-vscode",
     },
+    "[markdown]": {
+        "editor.defaultFormatter": "none",
+    },
     "eslint.workingDirectories": ["ui"],
     "editor.quickSuggestions": {
         "strings": "on",
