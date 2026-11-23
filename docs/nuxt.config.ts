@@ -3,6 +3,10 @@ export default defineNuxtConfig({
 
   extends: ["docus"],
 
+  site: {
+    name: "laks: The self-hosted Python registry",
+  },
+
   colorMode: {
     preference: "dark",
     fallback: "dark",

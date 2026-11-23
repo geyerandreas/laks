@@ -1,6 +1,6 @@
 ---
 seo:
-  title: Laks documentation
+  title: Documentation
   description: Getting started, using the Laks interface, and understanding the
     current Python package registry implementation.
 ---

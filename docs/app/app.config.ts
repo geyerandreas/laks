@@ -1,6 +1,5 @@
 export default defineAppConfig({
   header: {
-    title: "laks - Python Package Registry",
     logo: {
       favicon: "/favicon.svg",
     },
@@ -10,5 +9,10 @@ export default defineAppConfig({
       primary: "salmon",
       neutral: "zinc",
     },
+  },
+  github: {
+    url: "https://github.com/geyerandreas/laks",
+    branch: "main",
+    rootDir: "docs",
   },
 });
