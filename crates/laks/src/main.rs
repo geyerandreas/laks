@@ -39,7 +39,66 @@ async fn main() {
             init_config(&output);
         }
         CliResult::ShowConfig(resolved) => show_config(resolved),
+        #[cfg(debug_assertions)]
+        CliResult::SeedDatabase { count, resolved } => seed_database(resolved, count).await,
     }
+}
+
+#[cfg(debug_assertions)]
+async fn seed_database(resolved: ResolvedSettings, count: usize) {
+    let pool = sqlx::sqlite::SqlitePoolOptions::new()
+        .connect(&resolved.settings.database.db)
+        .await
+        .unwrap_or_else(|error| {
+            eprintln!("Error connecting to database: {error}");
+            std::process::exit(1);
+        });
+
+    sqlx::migrate!("../db/migrations")
+        .run(&pool)
+        .await
+        .unwrap_or_else(|error| {
+            eprintln!("Error running database migrations: {error}");
+            std::process::exit(1);
+        });
+
+    let wheels = laks_settings::seed::generate_fake_wheels(
+        &resolved.settings.registry.data_directory,
+        count,
+    )
+    .unwrap_or_else(|error| {
+        eprintln!("Error generating wheel files: {error}");
+        std::process::exit(1);
+    });
+
+    for wheel in wheels {
+        let package = laks_db::registry::add_package(&pool, &wheel.name)
+            .await
+            .unwrap_or_else(|error| {
+                eprintln!("Error seeding package {}: {error}", wheel.name);
+                std::process::exit(1);
+            });
+
+        laks_db::registry::add_package_file(
+            &pool,
+            package.id,
+            &wheel.filename,
+            &wheel.version,
+            Some(&wheel.requires_python),
+            &wheel.sha256_hash,
+            &wheel.file_path,
+        )
+        .await
+        .unwrap_or_else(|error| {
+            eprintln!("Error seeding package file {}: {error}", wheel.filename);
+            std::process::exit(1);
+        });
+    }
+
+    println!(
+        "Generated {} fake wheel package(s) in {}",
+        count, resolved.settings.registry.data_directory
+    );
 }
 
 fn show_config(resolved: ResolvedSettings) {
