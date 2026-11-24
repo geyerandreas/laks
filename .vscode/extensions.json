@@ -6,5 +6,6 @@
         "rust-lang.rust-analyzer",
         "bradlc.vscode-tailwindcss",
         "vue.volar",
+        "tombi-toml.tombi",
     ],
 }
