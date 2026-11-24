@@ -1,3 +1,4 @@
+use crate::settings::BASE_DIRECTORY;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,7 +15,7 @@ impl Default for SQLite {
         Self {
             address: "localhost".to_string(),
             port: 0,
-            db: "sqlite://./laks.sqlite?mode=rwc".to_string(),
+            db: format!("sqlite://./{BASE_DIRECTORY}/laks.sqlite?mode=rwc"),
             user: String::new(),
             password: String::new(),
         }
