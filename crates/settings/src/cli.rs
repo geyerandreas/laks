@@ -23,6 +23,14 @@ pub enum Commands {
         #[command(subcommand)]
         command: ConfigCommands,
     },
+    // Only included in `cargo build` / `cargo run` (omitted in `--release`)
+    #[cfg(debug_assertions)]
+    /// Generate fake wheel packages
+    Seed {
+        /// Number of wheel packages to generate
+        #[arg(default_value_t = 10)]
+        count: usize,
+    },
 }
 
 #[derive(Subcommand)]
@@ -40,8 +48,15 @@ pub enum ConfigCommands {
 pub enum CliResult {
     ShowHelp,
     RunServer(ResolvedSettings),
-    InitConfig { output: PathBuf },
+    InitConfig {
+        output: PathBuf,
+    },
     ShowConfig(ResolvedSettings),
+    #[cfg(debug_assertions)]
+    SeedDatabase {
+        count: usize,
+        resolved: ResolvedSettings,
+    },
 }
 
 pub fn parse_cli() -> CliResult {
@@ -75,6 +90,21 @@ pub fn parse_cli() -> CliResult {
             }
             None => CliResult::ShowConfig(default),
         },
+        #[cfg(debug_assertions)]
+        Some(Commands::Seed { count }) => {
+            let resolved = match cli.config_file {
+                Some(config_file) => {
+                    let content = fs::read_to_string(config_file)
+                        .unwrap_or_else(|error| panic!("failed to read config: {error}"));
+                    let settings = toml::from_str(&content)
+                        .unwrap_or_else(|error| panic!("failed to parse config: {error}"));
+                    ResolvedSettings { settings }
+                }
+                None => default,
+            };
+            CliResult::SeedDatabase { count, resolved }
+        }
+
         None => {
             Cli::command().print_help().ok();
             CliResult::ShowHelp

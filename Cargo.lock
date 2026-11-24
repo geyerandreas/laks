@@ -1425,10 +1425,15 @@ dependencies = [
 name = "laks-settings"
 version = "0.1.0"
 dependencies = [
+ "base64 0.23.1",
  "clap",
+ "hex",
  "serde",
+ "sha2 0.11.1",
+ "tempfile",
  "toml",
  "tracing",
+ "zip",
 ]
 
 [[package]]
