@@ -6,7 +6,7 @@
         "build": "vite build",
         "preview": "vite preview",
         "test:unit": "vitest run",
-        "typecheck": "vue-tsc --noEmit",
+        "typecheck": "vue-tsc -b --noEmit",
         "lint": "eslint .",
         "format": "oxfmt .",
         "format:check": "oxfmt --check ."
