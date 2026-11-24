@@ -1,10 +1,6 @@
 # UI development
 
-The frontend uses Nuxt, Vue, TypeScript, and Bun.
-
-## Setup
-
-From the repository root, install the frontend dependencies and start Nuxt:
+The frontend is a Vue 3 single-page application built with Vite, TypeScript, and Bun.
 
 ```sh
 cd ui
@@ -12,14 +8,14 @@ bun install
 bun run dev
 ```
 
-## Checks and formatting
+The development server uses port 3000 and connects to the API at `http://localhost:8080` by default. Set `VITE_API_BASE` before starting or building to use a different API origin. The API must allow credentialed requests from the frontend origin.
 
-Run these commands from `ui/`:
+Production builds are written to `dist/`. Configure the static server to serve `index.html` for client-side routes, including `/login`, `/packages`, and `/settings/users`.
 
 ```sh
-bun run lint          # Check with ESLint
-bun run lint:fix      # Apply ESLint fixes
-bun run format:check  # Check formatting with Oxfmt
-bun run format        # Apply Oxfmt formatting
-bun run typecheck     # Check TypeScript and Vue types
+bun run lint
+bun run format:check
+bun run typecheck
+bun run test:unit
+bun run build
 ```

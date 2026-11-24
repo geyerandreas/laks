@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink
+  <RouterLink
     to="/"
     aria-label="Laks home"
     class="brand rounded-md text-highlighted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
@@ -11,7 +11,7 @@
     </span>
 
     <span class="wordmark">laks</span>
-  </NuxtLink>
+  </RouterLink>
 </template>
 
 <style scoped>
@@ -27,7 +27,7 @@
 }
 
 .fish-mark {
-  font-family: "SFMono-Regular", Consolas, monospace;
+  font-family: 'SFMono-Regular', Consolas, monospace;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: -0.1em;

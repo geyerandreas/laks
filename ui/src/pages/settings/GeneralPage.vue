@@ -1,6 +1,7 @@
 <script setup lang="ts">
-const profile = reactive({ name: "", email: "" });
-const password = reactive({ current: "", next: "", confirmation: "" });
+import { reactive } from 'vue';
+const profile = reactive({ name: '', email: '' });
+const password = reactive({ current: '', next: '', confirmation: '' });
 </script>
 
 <template>

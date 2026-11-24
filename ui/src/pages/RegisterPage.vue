@@ -1,42 +1,41 @@
 <script setup lang="ts">
-import * as z from "zod";
-import type { FormSubmitEvent, AuthFormField } from "@nuxt/ui";
+import * as z from 'zod';
+import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { api } from '@/api';
 
-definePageMeta({
-  layout: false,
-});
-
-const config = useRuntimeConfig();
+const router = useRouter();
 const isSubmitting = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref('');
 
 const fields: AuthFormField[] = [
   {
-    name: "name",
-    type: "text",
-    label: "Full name",
-    placeholder: "Ada Lovelace",
+    name: 'name',
+    type: 'text',
+    label: 'Full name',
+    placeholder: 'Ada Lovelace',
     required: true,
   },
   {
-    name: "email",
-    type: "email",
-    label: "Email address",
-    placeholder: "you@example.com",
+    name: 'email',
+    type: 'email',
+    label: 'Email address',
+    placeholder: 'you@example.com',
     required: true,
   },
   {
-    name: "password",
-    type: "password",
-    label: "Password",
-    placeholder: "Create a secure password",
+    name: 'password',
+    type: 'password',
+    label: 'Password',
+    placeholder: 'Create a secure password',
     required: true,
   },
   {
-    name: "confirmPassword",
-    type: "password",
-    label: "Confirm password",
-    placeholder: "Enter your password again",
+    name: 'confirmPassword',
+    type: 'password',
+    label: 'Confirm password',
+    placeholder: 'Enter your password again',
     required: true,
   },
 ];
@@ -44,53 +43,51 @@ const fields: AuthFormField[] = [
 const schema = z
   .object({
     name: z
-      .string("Full name is required")
+      .string('Full name is required')
       .trim()
-      .min(1, "Full name is required"),
-    email: z.email("Enter a valid email address"),
+      .min(1, 'Full name is required'),
+    email: z.email('Enter a valid email address'),
     password: z
-      .string("Password is required")
-      .min(8, "Use at least 8 characters"),
-    confirmPassword: z.string("Please confirm your password"),
+      .string('Password is required')
+      .min(8, 'Use at least 8 characters'),
+    confirmPassword: z.string('Please confirm your password'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
+    path: ['confirmPassword'],
+    message: 'Passwords do not match',
   });
 
 type Schema = z.output<typeof schema>;
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-  errorMessage.value = "";
+  errorMessage.value = '';
   isSubmitting.value = true;
 
   try {
     const { name, email, password } = payload.data;
 
-    await $fetch("/api/v1/auth/register", {
-      baseURL: config.public.apiBase,
-      method: "POST",
+    await api('/api/v1/auth/register', {
+      method: 'POST',
       body: { name, email, password },
     });
 
-    await $fetch("/api/v1/auth/login", {
-      baseURL: config.public.apiBase,
-      method: "POST",
-      credentials: "include",
+    await api('/api/v1/auth/login', {
+      method: 'POST',
+      credentials: 'include',
       body: { email, password },
     });
 
-    await navigateTo("/dashboard");
+    await router.push('/');
   } catch (error: unknown) {
     const status =
-      typeof error === "object" && error !== null && "response" in error
+      typeof error === 'object' && error !== null && 'response' in error
         ? (error as { response?: { status?: number } }).response?.status
         : undefined;
 
     errorMessage.value =
       status === 409
-        ? "An account with this email already exists."
-        : "Unable to create your account right now. Please try again.";
+        ? 'An account with this email already exists.'
+        : 'Unable to create your account right now. Please try again.';
   } finally {
     isSubmitting.value = false;
   }
@@ -99,7 +96,6 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
 <template>
   <div class="min-h-screen bg-elevated/20">
-    <AppHeader />
     <main
       class="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8"
     >

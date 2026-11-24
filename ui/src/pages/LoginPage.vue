@@ -1,82 +1,78 @@
 <script setup lang="ts">
-import * as z from "zod";
-import type { FormSubmitEvent, AuthFormField } from "@nuxt/ui";
+import * as z from 'zod';
+import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { api } from '@/api';
 
-definePageMeta({
-  layout: false,
-});
-
-const config = useRuntimeConfig();
+const router = useRouter();
 const isSubmitting = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref('');
 
 const fields: AuthFormField[] = [
   {
-    name: "email",
-    type: "email",
-    label: "Email",
-    placeholder: "Enter your email",
+    name: 'email',
+    type: 'email',
+    label: 'Email',
+    placeholder: 'Enter your email',
     required: true,
   },
   {
-    name: "password",
-    label: "Password",
-    type: "password",
-    placeholder: "Enter your password",
+    name: 'password',
+    label: 'Password',
+    type: 'password',
+    placeholder: 'Enter your password',
     required: true,
   },
   {
-    name: "remember",
-    label: "Remember me",
-    type: "checkbox",
+    name: 'remember',
+    label: 'Remember me',
+    type: 'checkbox',
   },
 ];
 
 // TODO
 // const providers = [{
 //   label: 'Google',
-//   icon: 'i-simple-icons-google',
 //   onClick: () => {
 //     toast.add({ title: 'Google', description: 'Login with Google' })
 //   }
 // }, {
 //   label: 'GitHub',
-//   icon: 'i-simple-icons-github',
 //   onClick: () => {
 //     toast.add({ title: 'GitHub', description: 'Login with GitHub' })
 //   }
 // }]
 
 const schema = z.object({
-  email: z.email("Invalid email"),
-  password: z.string("Password is required"),
+  email: z.email('Invalid email'),
+  password: z.string('Password is required'),
 });
 
 type Schema = z.output<typeof schema>;
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-  errorMessage.value = "";
+  errorMessage.value = '';
   isSubmitting.value = true;
 
   try {
-    await $fetch("/api/v1/auth/login", {
-      baseURL: config.public.apiBase,
-      method: "POST",
-      credentials: "include",
+    await api('/api/v1/auth/login', {
+      method: 'POST',
+      credentials: 'include',
       body: payload.data,
     });
 
-    await navigateTo("/dashboard");
+    await router.push('/');
   } catch (error: unknown) {
     const status =
-      typeof error === "object" && error !== null && "response" in error
+      typeof error === 'object' && error !== null && 'response' in error
         ? (error as { response?: { status?: number } }).response?.status
         : undefined;
 
     errorMessage.value =
       status === 401
-        ? "The email or password is incorrect."
-        : "Unable to sign in right now. Please try again.";
+        ? 'The email or password is incorrect.'
+        : 'Unable to sign in right now. Please try again.';
   } finally {
     isSubmitting.value = false;
   }

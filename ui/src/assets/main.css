@@ -1,9 +1,9 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 @theme static {
-    --font-sans: "Geist Mono", monospace;
-    --font-mono: "Geist Mono", monospace;
+    --font-sans: 'Geist Mono', monospace;
+    --font-mono: 'Geist Mono', monospace;
 
     --color-salmon-50: #fff3ef;
     --color-salmon-100: #ffe4dc;
