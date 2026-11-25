@@ -4,6 +4,8 @@ use crate::{
     local::Local, log::Log, oauth2::OAuth2, registry::Registry, setup::Setup, sqlite::SQLite,
 };
 
+pub const BASE_DIRECTORY: &str = ".laks";
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Settings {
     pub database: SQLite,

@@ -1,3 +1,4 @@
+use crate::settings::BASE_DIRECTORY;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -8,7 +9,7 @@ pub struct Registry {
 impl Default for Registry {
     fn default() -> Self {
         Self {
-            data_directory: String::from("./storage"),
+            data_directory: format!("{BASE_DIRECTORY}/storage"),
         }
     }
 }

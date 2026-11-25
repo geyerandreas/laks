@@ -27,7 +27,7 @@ target
 
 *.sqlite
 
-./storage/
+.laks
 
 # Settings file
 ./laks.toml
