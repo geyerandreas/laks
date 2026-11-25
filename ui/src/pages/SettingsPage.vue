@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from "@nuxt/ui";
+import type { NavigationMenuItem } from '@nuxt/ui';
 
 const links = [
   [
     {
-      label: "General",
-      icon: "i-lucide-user",
-      to: "/settings/general",
+      label: 'General',
+      icon: 'i-lucide-user',
+      to: '/settings/general',
       exact: true,
     },
     {
-      label: "Users",
-      icon: "i-lucide-users",
-      to: "/settings/users",
+      label: 'Users',
+      icon: 'i-lucide-users',
+      to: '/settings/users',
     },
   ],
 ] satisfies NavigationMenuItem[][];

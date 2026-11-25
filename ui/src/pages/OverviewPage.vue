@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const stats = [
-  { name: "Total Python Packages", value: "14", icon: "i-lucide-package" },
-  { name: "Monthly Downloads", value: "12,482", icon: "i-lucide-download" },
-  { name: "Storage Used", value: "412.5 MB", icon: "i-lucide-database" },
+  { name: 'Total Python Packages', value: '14', icon: 'i-lucide-package' },
+  { name: 'Monthly Downloads', value: '12,482', icon: 'i-lucide-download' },
+  { name: 'Storage Used', value: '412.5 MB', icon: 'i-lucide-database' },
 ];
 </script>
 
@@ -45,7 +45,7 @@ const stats = [
 
     <!-- Quick Twine Instructions -->
     <UAlert
-      icon="i-heroicons-command-line"
+      icon="i-lucide-terminal"
       color="primary"
       variant="soft"
       title="Quick PIP Configuration"

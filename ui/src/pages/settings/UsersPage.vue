@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from '@nuxt/ui';
+import { onMounted, ref } from 'vue';
+import { api } from '@/api';
 
-const config = useRuntimeConfig();
 const users = ref<User[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
@@ -9,9 +10,9 @@ const isDeleting = ref(false);
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const userToDelete = ref<User | null>(null);
-const form = ref<UserForm>({ name: "", email: "", password: "" });
+const form = ref<UserForm>({ name: '', email: '', password: '' });
 const editingUser = ref<User | null>(null);
-const errorMessage = ref("");
+const errorMessage = ref('');
 
 interface User {
   id: number;
@@ -26,24 +27,22 @@ interface UserForm {
 }
 
 const columns: TableColumn<User>[] = [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "email", header: "Email address" },
-  { id: "actions", header: "" },
+  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'email', header: 'Email address' },
+  { id: 'actions', header: '' },
 ];
 
 async function loadUsers() {
   isLoading.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
 
   try {
-    const response = await $fetch<User[]>("/api/v1/users", {
-      baseURL: config.public.apiBase,
-    });
+    const response = await api<User[]>('/api/v1/users');
     users.value = response;
   } catch (error: unknown) {
     errorMessage.value = getErrorMessage(
       error,
-      "Unable to load users. Please try again.",
+      'Unable to load users. Please try again.',
     );
   } finally {
     isLoading.value = false;
@@ -51,15 +50,15 @@ async function loadUsers() {
 }
 
 async function saveUser() {
-  errorMessage.value = "";
+  errorMessage.value = '';
 
   if (!form.value.name.trim() || !form.value.email.trim()) {
-    errorMessage.value = "Name and email address are required.";
+    errorMessage.value = 'Name and email address are required.';
     return;
   }
 
   if (!editingUser.value && !form.value.password) {
-    errorMessage.value = "A password is required for new users.";
+    errorMessage.value = 'A password is required for new users.';
     return;
   }
 
@@ -67,11 +66,10 @@ async function saveUser() {
 
   try {
     if (editingUser.value) {
-      const updatedUser = await $fetch<User>(
+      const updatedUser = await api<User>(
         `/api/v1/users/${editingUser.value.id}`,
         {
-          baseURL: config.public.apiBase,
-          method: "PATCH",
+          method: 'PATCH',
           body: {
             name: form.value.name.trim(),
             email: form.value.email.trim(),
@@ -82,9 +80,8 @@ async function saveUser() {
         user.id === updatedUser.id ? updatedUser : user,
       );
     } else {
-      const createdUser = await $fetch<User>("/api/v1/users", {
-        baseURL: config.public.apiBase,
-        method: "POST",
+      const createdUser = await api<User>('/api/v1/users', {
+        method: 'POST',
         body: {
           name: form.value.name.trim(),
           email: form.value.email.trim(),
@@ -98,7 +95,7 @@ async function saveUser() {
   } catch (error: unknown) {
     errorMessage.value = getErrorMessage(
       error,
-      "Unable to save this user. Please try again.",
+      'Unable to save this user. Please try again.',
     );
   } finally {
     isSaving.value = false;
@@ -109,12 +106,11 @@ async function deleteUser() {
   if (!userToDelete.value) return;
 
   isDeleting.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
 
   try {
-    await $fetch(`/api/v1/users/${userToDelete.value.id}`, {
-      baseURL: config.public.apiBase,
-      method: "DELETE",
+    await api(`/api/v1/users/${userToDelete.value.id}`, {
+      method: 'DELETE',
     });
     users.value = users.value.filter(
       (user) => user.id !== userToDelete.value?.id,
@@ -124,7 +120,7 @@ async function deleteUser() {
   } catch (error: unknown) {
     errorMessage.value = getErrorMessage(
       error,
-      "Unable to delete this user. Please try again.",
+      'Unable to delete this user. Please try again.',
     );
   } finally {
     isDeleting.value = false;
@@ -132,15 +128,15 @@ async function deleteUser() {
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
-  if (typeof error === "object" && error !== null && "response" in error) {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
     const response = error.response;
     if (
-      typeof response === "object" &&
+      typeof response === 'object' &&
       response !== null &&
-      "status" in response
+      'status' in response
     ) {
       return response.status === 409
-        ? "A user with this email already exists."
+        ? 'A user with this email already exists.'
         : fallback;
     }
   }
@@ -150,21 +146,21 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 function openCreateModal() {
   editingUser.value = null;
-  form.value = { name: "", email: "", password: "" };
-  errorMessage.value = "";
+  form.value = { name: '', email: '', password: '' };
+  errorMessage.value = '';
   isModalOpen.value = true;
 }
 
 function openDeleteModal(user: User) {
   userToDelete.value = user;
-  errorMessage.value = "";
+  errorMessage.value = '';
   isDeleteModalOpen.value = true;
 }
 
 function openEditModal(user: User) {
   editingUser.value = user;
-  form.value = { name: user.name, email: user.email, password: "" };
-  errorMessage.value = "";
+  form.value = { name: user.name, email: user.email, password: '' };
+  errorMessage.value = '';
   isModalOpen.value = true;
 }
 
@@ -174,7 +170,7 @@ function closeModal() {
   }
 }
 
-await loadUsers();
+onMounted(loadUsers);
 </script>
 
 <template>
@@ -269,13 +265,13 @@ await loadUsers();
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="font-semibold text-highlighted">
-                  {{ editingUser ? "Edit user" : "Add user" }}
+                  {{ editingUser ? 'Edit user' : 'Add user' }}
                 </h3>
                 <p class="text-sm text-muted">
                   {{
                     editingUser
-                      ? "Update this user’s name or email address."
-                      : "Create an account for a repository user."
+                      ? 'Update this user’s name or email address.'
+                      : 'Create an account for a repository user.'
                   }}
                 </p>
               </div>
