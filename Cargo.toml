@@ -27,6 +27,8 @@ hex = { version = "0.4.3" }
 jsonwebtoken = { version = "11.0.0", features = ["rust_crypto"] }
 mailparse = { version = "0.18.0" }
 object_store = { version = "0.14.1" }
+petname = { version = "3.2.0" }
+rand = { version = "0.10.4" }
 regex = { version = "1.13.1" }
 rfc2047-decoder = { version = "1.1.2" }
 serde = { version = "1.0.229", features = ["derive"] }

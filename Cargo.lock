@@ -360,6 +360,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap_complete"
+version = "4.6.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a35200383f20018d41c14d1ab19c1727c697f544492143f7d93aa39f0187848"
+dependencies = [
+ "clap",
+]
+
+[[package]]
 name = "clap_derive"
 version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1428,6 +1437,8 @@ dependencies = [
  "base64 0.23.1",
  "clap",
  "hex",
+ "petname",
+ "rand 0.10.4",
  "serde",
  "sha2 0.11.1",
  "tempfile",
@@ -1855,6 +1866,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
+name = "petname"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfb4653a82ec48e6d324c788597aadf46449bfc7b8e76d2a03b513a944325c88"
+dependencies = [
+ "clap",
+ "clap_complete",
+ "petname-macros",
+ "rand 0.10.4",
+]
+
+[[package]]
+name = "petname-macros"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78c406fb544296f598ccf69b82bcf1b12440c8f23ebf75946105f86304f16eb2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.4",
+]
+
+[[package]]
 name = "phc"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1984,9 +2018,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.10.2"
+version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7f5fa3a058cd35567ef9bfa5e75732bee0f9e4c55fa90477bef2dfcdbc4be80"
+checksum = "8f6fa277c67e6ea590466f04c3fe82cb509f0864fe470643e5570de9514a9b11"
 dependencies = [
  "chacha20",
  "getrandom 0.4.3",
@@ -2515,7 +2549,7 @@ dependencies = [
  "log",
  "md-5",
  "memchr",
- "rand 0.10.2",
+ "rand 0.10.4",
  "serde",
  "serde_json",
  "sha2 0.11.1",

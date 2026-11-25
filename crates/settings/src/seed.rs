@@ -114,7 +114,8 @@ pub fn generate_fake_wheels(
 
     for index in 1..=count {
         let package = Package {
-            name: format!("fake_package_{index:03}"),
+            name: petname::petname(rand::random_range(1..=3), "-")
+                .expect("should create a petname"),
             version: format!("0.{}.0", index),
             requires_python: "3.10".to_owned(),
         };
@@ -148,6 +149,7 @@ mod tests {
         for wheel in wheels {
             assert!(wheel.path.is_file());
             assert!(wheel.file_path.ends_with(".whl"));
+            assert!((1..=3).contains(&wheel.name.split('-').count()));
         }
     }
 }
