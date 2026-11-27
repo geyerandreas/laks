@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useColorMode } from '@vueuse/core';
 import { RouterView } from 'vue-router';
+import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 
 useColorMode({ initialValue: 'dark' });
@@ -14,6 +15,6 @@ useColorMode({ initialValue: 'dark' });
         <RouterView />
       </UContainer>
     </UMain>
-    <UFooter />
+    <AppFooter />
   </UApp>
 </template>
