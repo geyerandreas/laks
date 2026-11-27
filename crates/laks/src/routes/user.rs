@@ -9,11 +9,14 @@ use utoipa::ToSchema;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_axum::routes;
 
+use crate::auth::AuthUser;
+
 /// Creates the user management routes
 pub fn create_routes() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         // User CRUD
         .routes(routes!(list_users, add))
+        .routes(routes!(get_current))
         .routes(routes!(delete, get, update))
 }
 
@@ -49,6 +52,34 @@ impl From<UserCreate> for laks_db::users::UserCreate {
             is_admin: value.is_admin,
         }
     }
+}
+
+/// Get the current user
+#[utoipa::path(
+    get,
+    path = "/me",
+    tag = "users",
+    responses(
+        (status = 200, description = "Current user", body = UserPublic),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error"),
+    ),
+)]
+async fn get_current(
+    AuthUser { user_id }: AuthUser,
+    State(pool): State<SqlitePool>,
+) -> Result<Json<UserPublic>, StatusCode> {
+    let user = laks_db::users::get(&pool, user_id)
+        .await
+        .map_err(|error| match error {
+            sqlx::Error::RowNotFound => StatusCode::UNAUTHORIZED,
+            error => {
+                tracing::error!(%error, "Failed to fetch current user");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        })?; // lol, rust, seriouslly?!
+
+    Ok(Json(UserPublic::from(user)))
 }
 
 /// List all users
