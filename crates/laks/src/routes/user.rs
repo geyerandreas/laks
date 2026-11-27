@@ -16,7 +16,7 @@ pub fn create_routes() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         // User CRUD
         .routes(routes!(list_users, add))
-        .routes(routes!(get_current))
+        .routes(routes!(get_current, update_current))
         .routes(routes!(delete, get, update))
 }
 
@@ -54,6 +54,13 @@ impl From<UserCreate> for laks_db::users::UserCreate {
     }
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(deny_unknown_fields)]
+pub struct UserProfileUpdate {
+    pub name: Option<String>,
+    pub email: Option<String>,
+}
+
 /// Get the current user
 #[utoipa::path(
     get,
@@ -78,6 +85,44 @@ async fn get_current(
                 StatusCode::INTERNAL_SERVER_ERROR
             }
         })?; // lol, rust, seriouslly?!
+
+    Ok(Json(UserPublic::from(user)))
+}
+
+/// Update the current user
+#[utoipa::path(
+    patch,
+    path = "/me",
+    tag = "users",
+    request_body = UserProfileUpdate,
+    responses(
+        (status = 200, description = "Current user updated", body = UserPublic),
+        (status = 401, description = "Unauthorized"),
+        (status = 409, description = "Email address is already in use"),
+        (status = 500, description = "Internal server error"),
+    ),
+)]
+async fn update_current(
+    AuthUser { user_id }: AuthUser,
+    State(pool): State<SqlitePool>,
+    Json(payload): Json<UserProfileUpdate>,
+) -> Result<Json<UserPublic>, StatusCode> {
+    let update = UserUpdate {
+        name: payload.name,
+        email: payload.email,
+        is_admin: None,
+    };
+
+    let user = laks_db::users::update(&pool, user_id, &update)
+        .await
+        .map_err(|error| match error {
+            sqlx::Error::RowNotFound => StatusCode::UNAUTHORIZED,
+            sqlx::Error::Database(error) if error.is_unique_violation() => StatusCode::CONFLICT,
+            error => {
+                tracing::error!(%error, "Failed to update current user");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        })?;
 
     Ok(Json(UserPublic::from(user)))
 }

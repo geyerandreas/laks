@@ -59,9 +59,9 @@ pub async fn update(pool: &SqlitePool, id: i32, user: &UserUpdate) -> Result<Use
         UPDATE users
         SET
             name = COALESCE($1, name),
-            email = COALESCE($2, email)
+            email = COALESCE($2, email),
             is_admin = COALESCE($3, is_admin)
-        WHERE id = $3
+        WHERE id = $4
         RETURNING *",
     )
     .bind(&user.name)
