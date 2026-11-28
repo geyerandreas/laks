@@ -79,6 +79,16 @@ pub struct UserProfileUpdate {
     pub email: Option<String>,
 }
 
+impl From<UserProfileUpdate> for laks_db::users::UserUpdate {
+    fn from(value: UserProfileUpdate) -> Self {
+        Self {
+            name: value.name,
+            email: value.email,
+            is_admin: None,
+        }
+    }
+}
+
 /// Get the current user
 #[utoipa::path(
     get,
@@ -125,13 +135,7 @@ async fn update_current(
     State(pool): State<SqlitePool>,
     Json(payload): Json<UserProfileUpdate>,
 ) -> Result<Json<UserPublic>, StatusCode> {
-    let update = UserUpdate {
-        name: payload.name,
-        email: payload.email,
-        is_admin: None,
-    };
-
-    let user = laks_db::users::update(&pool, user_id, &update.into())
+    let user = laks_db::users::update(&pool, user_id, &payload.into())
         .await
         .map_err(|error| match error {
             sqlx::Error::RowNotFound => StatusCode::UNAUTHORIZED,
