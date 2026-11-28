@@ -26,7 +26,7 @@ pub struct UserCreate {
     pub is_admin: bool,
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug)]
 pub struct UserUpdate {
     pub name: Option<String>,
     pub email: Option<String>,
