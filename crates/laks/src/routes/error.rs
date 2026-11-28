@@ -67,6 +67,17 @@ pub enum RegistryError {
     Internal(anyhow::Error),
 }
 
+impl From<laks_db::error::ProjectDatabaseError> for RegistryError {
+    fn from(error: laks_db::error::ProjectDatabaseError) -> Self {
+        match error {
+            laks_db::error::ProjectDatabaseError::ProjectNotFound(project) => {
+                Self::ProjectNotFound(project)
+            }
+            _ => Self::Internal(anyhow::Error::new(error)),
+        }
+    }
+}
+
 impl IntoResponse for RegistryError {
     fn into_response(self) -> Response {
         let problem = match self {

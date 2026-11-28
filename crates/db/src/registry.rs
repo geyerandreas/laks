@@ -1,7 +1,7 @@
-use crate::error::Result;
+use crate::error::{ProjectDatabaseError, Result};
 use laks_common::normalize_name;
 use serde::Serialize;
-use sqlx::{Error, SqlitePool, prelude::FromRow};
+use sqlx::{SqlitePool, prelude::FromRow};
 
 #[derive(Debug, Serialize, FromRow)]
 pub struct Package {
@@ -22,30 +22,40 @@ pub struct PackageFile {
     pub uploaded_at: String,
 }
 
-pub async fn get_package(pool: &SqlitePool, package_name: &str) -> Result<Package, Error> {
+pub async fn get_package(
+    pool: &SqlitePool,
+    package_name: &str,
+) -> Result<Package, ProjectDatabaseError> {
+    let normalized_name = normalize_name(package_name);
     sqlx::query_as::<_, Package>("SELECT * FROM Packages WHERE normalized_name = $1")
-        .bind(package_name)
+        .bind(&normalized_name)
         .fetch_one(pool)
         .await
+        .map_err(|_| ProjectDatabaseError::ProjectNotFound(normalized_name))
 }
 
 pub async fn get_package_files(
     pool: &SqlitePool,
     package_id: i32,
-) -> Result<Vec<PackageFile>, Error> {
+) -> Result<Vec<PackageFile>, ProjectDatabaseError> {
     sqlx::query_as("SELECT * FROM PackageFiles WHERE package_id = $1 ORDER BY filename")
         .bind(package_id)
         .fetch_all(pool)
         .await
+        .map_err(|_| ProjectDatabaseError::NoPackageFilesFound)
 }
 
-pub async fn get_packages(pool: &SqlitePool) -> Result<Vec<String>, Error> {
+pub async fn get_packages(pool: &SqlitePool) -> Result<Vec<String>, ProjectDatabaseError> {
     sqlx::query_scalar("SELECT name FROM Packages ORDER BY name ASC")
         .fetch_all(pool)
         .await
+        .map_err(|_| ProjectDatabaseError::NoPackagesFound)
 }
 
-pub async fn add_package(pool: &SqlitePool, package_name: &str) -> Result<Package> {
+pub async fn add_package(
+    pool: &SqlitePool,
+    package_name: &str,
+) -> Result<Package, ProjectDatabaseError> {
     let result = sqlx::query_as(
         "INSERT INTO Packages (name, normalized_name)
         VALUES ($1, $2)
@@ -56,7 +66,6 @@ pub async fn add_package(pool: &SqlitePool, package_name: &str) -> Result<Packag
     .bind(normalize_name(package_name))
     .fetch_one(pool)
     .await?;
-
     Ok(result)
 }
 
@@ -68,8 +77,8 @@ pub async fn add_package_file(
     requires_python: Option<&str>,
     sha256_hash: &str,
     file_path: &str,
-) -> Result<PackageFile> {
-    sqlx::query_as(
+) -> Result<PackageFile, ProjectDatabaseError> {
+    let result = sqlx::query_as(
         "INSERT INTO PackageFiles
             (package_id, filename, version, requires_python, sha256_hash, file_path)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -87,6 +96,6 @@ pub async fn add_package_file(
     .bind(sha256_hash)
     .bind(file_path)
     .fetch_one(pool)
-    .await
-    .map_err(Into::into)
+    .await?;
+    Ok(result)
 }
