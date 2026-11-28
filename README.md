@@ -23,5 +23,5 @@ This will create a `laks.toml`.
 To use this while developing, run the following:
 
 ```sh
-bacon run--long -- -c laks.toml
+bacon run-long -- -c laks.toml
 ```
