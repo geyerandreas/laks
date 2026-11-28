@@ -2,7 +2,7 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use laks_appstate::AppState;
-use laks_db::users::{User, UserUpdate};
+use laks_db::users::User;
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
@@ -49,6 +49,23 @@ impl From<UserCreate> for laks_db::users::UserCreate {
             name: value.name,
             email: value.email,
             password: value.password,
+            is_admin: value.is_admin,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UserUpdate {
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub is_admin: Option<bool>,
+}
+
+impl From<UserUpdate> for laks_db::users::UserUpdate {
+    fn from(value: UserUpdate) -> Self {
+        Self {
+            name: value.name,
+            email: value.email,
             is_admin: value.is_admin,
         }
     }
@@ -113,7 +130,7 @@ async fn update_current(
         is_admin: None,
     };
 
-    let user = laks_db::users::update(&pool, user_id, &update)
+    let user = laks_db::users::update(&pool, user_id, &update.into())
         .await
         .map_err(|error| match error {
             sqlx::Error::RowNotFound => StatusCode::UNAUTHORIZED,
@@ -243,7 +260,7 @@ pub async fn update(
     Path(id): Path<i32>,
     Json(payload): Json<UserUpdate>,
 ) -> Result<Json<UserPublic>, StatusCode> {
-    let user = laks_db::users::update(&pool, id, &payload)
+    let user = laks_db::users::update(&pool, id, &payload.into())
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
