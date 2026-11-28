@@ -5,7 +5,7 @@ use axum::{
         HeaderMap, StatusCode,
         header::{self, CONTENT_TYPE},
     },
-    response::{Html, IntoResponse, Response},
+    response::{Html, IntoResponse},
 };
 use laks_appstate::AppState;
 use laks_common::normalize_name;
@@ -110,17 +110,8 @@ async fn get_project(
 ) -> Result<impl IntoResponse, RegistryError> {
     let normalized = normalize_name(&project);
 
-    let package = match laks_db::registry::get_package(&state.pool, &normalized).await {
-        Ok(package) => package,
-        Err(sqlx::Error::RowNotFound) => return Err(RegistryError::ProjectNotFound(normalized)),
-        Err(error) => return Err(RegistryError::Internal(anyhow::Error::new(error))),
-    };
-    let files = match laks_db::registry::get_package_files(&state.pool, package.id).await {
-        Ok(files) => files,
-        Err(error) => {
-            return Err(RegistryError::Internal(anyhow::Error::new(error)));
-        }
-    };
+    let package = laks_db::registry::get_package(&state.pool, &project).await?;
+    let files = laks_db::registry::get_package_files(&state.pool, package.id).await?;
 
     let accept_header = request
         .headers()
@@ -199,9 +190,7 @@ async fn list_projects(
     format: ResponseFormat,
     original_uri: OriginalUri,
 ) -> Result<impl IntoResponse, RegistryError> {
-    let projects: Vec<String> = laks_db::registry::get_packages(&state.pool)
-        .await
-        .map_err(|err| RegistryError::Internal(anyhow::Error::new(err)))?;
+    let projects: Vec<String> = laks_db::registry::get_packages(&state.pool).await?;
 
     match format {
         ResponseFormat::Json => {
