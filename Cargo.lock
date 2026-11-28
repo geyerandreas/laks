@@ -1421,6 +1421,9 @@ name = "laks-common"
 version = "0.1.0"
 dependencies = [
  "regex",
+ "serde",
+ "sqlx",
+ "thiserror",
 ]
 
 [[package]]
@@ -1444,6 +1447,7 @@ dependencies = [
  "base64 0.23.1",
  "clap",
  "hex",
+ "laks-common",
  "petname",
  "rand 0.10.4",
  "serde",

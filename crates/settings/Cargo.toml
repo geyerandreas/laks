@@ -18,5 +18,7 @@ toml.workspace = true
 tracing.workspace = true
 zip.workspace = true
 
+laks-common.workspace = true
+
 [dev-dependencies]
 tempfile.workspace = true
