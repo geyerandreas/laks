@@ -101,7 +101,7 @@ async fn get_current(
                 tracing::error!(%error, "Failed to fetch current user");
                 StatusCode::INTERNAL_SERVER_ERROR
             }
-        })?; // lol, rust, seriouslly?!
+        })?; // lol, rust, seriously?!
 
     Ok(Json(UserPublic::from(user)))
 }
