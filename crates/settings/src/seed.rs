@@ -1,5 +1,6 @@
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use sha2::{Digest, Sha256};
+use std::collections::HashSet;
 use std::io::{Cursor, Write};
 use std::path::{Path, PathBuf};
 use zip::ZipWriter;
@@ -111,15 +112,29 @@ pub fn generate_fake_wheels(
     count: usize,
 ) -> std::io::Result<Vec<GeneratedWheel>> {
     let mut wheels = Vec::with_capacity(count);
+    let mut project_names = HashSet::with_capacity(count);
 
-    for index in 1..=count {
-        let package = Package {
-            name: petname::petname(rand::random_range(1..=3), "-")
-                .expect("should create a petname"),
-            version: format!("0.{}.0", index),
-            requires_python: "3.10".to_owned(),
-        };
-        wheels.push(generate_wheel_file(output_dir.as_ref(), package)?);
+    for index in 0..count {
+        let base_name =
+            petname::petname(rand::random_range(1..=3), "-").expect("should create a petname");
+        let mut name = base_name.clone();
+        let mut suffix = 0;
+        while !project_names.insert(name.clone()) {
+            suffix += 1;
+            name = format!("{base_name}-{index}-{suffix}");
+        }
+
+        let requires_python = format!("3.{}", rand::random_range(10..=15));
+        let version_count = rand::random_range(1..=5);
+
+        for version in 1..=version_count {
+            let package = Package {
+                name: name.clone(),
+                version: format!("0.{version}.0"),
+                requires_python: requires_python.clone(),
+            };
+            wheels.push(generate_wheel_file(output_dir.as_ref(), package)?);
+        }
     }
 
     Ok(wheels)
@@ -145,11 +160,34 @@ mod tests {
         let directory = tempdir().unwrap();
         let wheels = generate_fake_wheels(directory.path(), 10).unwrap();
 
-        assert_eq!(wheels.len(), 10);
-        for wheel in wheels {
+        let mut projects = std::collections::HashMap::new();
+        for wheel in &wheels {
             assert!(wheel.path.is_file());
             assert!(wheel.file_path.ends_with(".whl"));
-            assert!((1..=3).contains(&wheel.name.split('-').count()));
+            assert!(!wheel.name.is_empty());
+            let python_minor = wheel.requires_python.strip_prefix("3.").unwrap();
+            assert!((10..=15).contains(&python_minor.parse::<u8>().unwrap()));
+            let project_versions = projects
+                .entry(&wheel.name)
+                .or_insert_with(|| (wheel.requires_python.clone(), Vec::new()));
+            assert_eq!(project_versions.0, wheel.requires_python);
+            project_versions.1.push(wheel.version.as_str());
+        }
+
+        assert_eq!(projects.len(), 10);
+        for (_, versions) in projects.values() {
+            assert!((1..=5).contains(&versions.len()));
+            assert_eq!(
+                versions.len(),
+                versions.iter().collect::<HashSet<_>>().len()
+            );
+            assert!(versions.iter().all(|version| {
+                let minor = version
+                    .strip_prefix("0.")
+                    .and_then(|version| version.strip_suffix(".0"))
+                    .and_then(|minor| minor.parse::<u8>().ok());
+                minor.is_some_and(|minor| (1..=5).contains(&minor))
+            }));
         }
     }
 }

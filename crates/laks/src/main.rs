@@ -96,7 +96,7 @@ async fn seed_database(resolved: ResolvedSettings, count: usize) {
     }
 
     println!(
-        "Generated {} fake wheel package(s) in {}",
+        "Generated {} fake project(s) in {}",
         count, resolved.settings.registry.data_directory
     );
 }

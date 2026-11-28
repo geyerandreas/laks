@@ -25,9 +25,9 @@ pub enum Commands {
     },
     // Only included in `cargo build` / `cargo run` (omitted in `--release`)
     #[cfg(debug_assertions)]
-    /// Generate fake wheel packages
+    /// Generate fake projects with multiple wheel versions
     Seed {
-        /// Number of wheel packages to generate
+        /// Number of projects to generate
         #[arg(default_value_t = 10)]
         count: usize,
     },
