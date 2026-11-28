@@ -1,11 +1,11 @@
 use axum::{
     Json,
-    extract::{Multipart, OriginalUri, Path, Request, State},
+    extract::{Multipart, OriginalUri, Path, State},
     http::{
         HeaderMap, StatusCode,
         header::{self, CONTENT_TYPE},
     },
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Response},
 };
 use laks_appstate::AppState;
 use laks_common::normalize_name;
@@ -88,7 +88,7 @@ struct ProjectDetailsJson {
             description = "HTML or JSON Index of the Packages",
             content(
                 (String = "text/html"),
-                (ProjectDetailsJson = "application/vnd.pypi.simple.v1+json")
+                (ProjectDetailsJson = "application/vnd.pypi.simple.v1+json"),
             )
         ),
         (
@@ -104,58 +104,40 @@ struct ProjectDetailsJson {
     )
 )]
 async fn get_project(
-    State(state): State<AppState>,
     Path(project): Path<String>,
-    request: Request,
+    format: ResponseFormat,
+    State(state): State<AppState>,
 ) -> Result<impl IntoResponse, RegistryError> {
     let normalized = normalize_name(&project);
 
-    let package = laks_db::registry::get_package(&state.pool, &project).await?;
+    let package = laks_db::registry::get_package(&state.pool, &normalized).await?;
     let files = laks_db::registry::get_package_files(&state.pool, package.id).await?;
 
-    let accept_header = request
-        .headers()
-        .get(header::ACCEPT)
-        .and_then(|h| h.to_str().ok())
-        .unwrap_or("");
+    match format {
+        ResponseFormat::Html => Ok(project_html_response(&normalized, files)),
+        ResponseFormat::Json => Ok(project_simple_json_response(&normalized, files)),
+    }
+}
 
-    if accept_header.contains("application/vnd.pypi.simple.v1+json") {
-        // PEP 691 JSON
-        let response_json = ProjectDetailsJson {
-            meta: Meta {
-                api_version: "1.0".to_owned(),
-            },
-            files: files
-                .into_iter()
-                .map(|file| PackageFileJson::from_package_file(file, &normalized))
-                .collect(),
-        };
-        Ok((
-            StatusCode::OK,
-            [(header::CONTENT_TYPE, "application/vnd.pypi.simple.v1+json")],
-            Json(response_json),
-        )
-            .into_response())
-    } else {
-        let links = files
-            .into_iter()
-            .map(|file| {
-                let url = format!("/packages/{normalized}/{}", file.filename);
-                let hash = file.sha256_hash;
-                let requires_python = file
-                    .requires_python
-                    .map(|value| format!(r#" data-requires-python="{value}""#))
-                    .unwrap_or_default();
-                format!(
-                    r#"<a href="{url}#sha256={hash}"{requires_python}>{}</a>"#,
-                    file.filename
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-        let html_content = format!(
-            r#"
-<!DOCTYPE html>
+fn project_html_response(normalized: &str, files: Vec<laks_db::registry::PackageFile>) -> Response {
+    let links = files
+        .into_iter()
+        .map(|file| {
+            let url = format!("/packages/{normalized}/{}", file.filename);
+            let hash = file.sha256_hash;
+            let requires_python = file
+                .requires_python
+                .map(|value| format!(r#" data-requires-python="{value}""#))
+                .unwrap_or_default();
+            format!(
+                r#"<a href="{url}#sha256={hash}"{requires_python}>{}</a>"#,
+                file.filename
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let html_content = format!(
+        r#"<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta name="pypi:repository-version" content="1.0">
@@ -165,14 +147,35 @@ async fn get_project(
     {links}
 </body>
 </html>"#
-        );
-        Ok((
-            StatusCode::OK,
-            [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
-            html_content,
-        )
-            .into_response())
-    }
+    )
+    .replace("\n", "");
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+        html_content,
+    )
+        .into_response()
+}
+
+fn project_simple_json_response(
+    normalized: &str,
+    files: Vec<laks_db::registry::PackageFile>,
+) -> Response {
+    let response_json = ProjectDetailsJson {
+        meta: Meta {
+            api_version: "1.0".to_owned(),
+        },
+        files: files
+            .into_iter()
+            .map(|file| PackageFileJson::from_package_file(file, normalized))
+            .collect(),
+    };
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "application/vnd.pypi.simple.v1+json")],
+        Json(response_json),
+    )
+        .into_response()
 }
 
 /// List all projects
