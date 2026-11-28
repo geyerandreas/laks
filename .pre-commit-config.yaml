@@ -22,6 +22,24 @@ repos:
         language: system
         types: [rust]
         priority: 0
+      - id: ui-format
+        name: UI format check
+        entry: bun run --cwd ui format:check
+        language: system
+        files: ^ui/
+        pass_filenames: false
+      - id: ui-lint
+        name: UI lint
+        entry: bun run --cwd ui lint
+        language: system
+        files: ^ui/
+        pass_filenames: false
+      - id: ui-typecheck
+        name: UI typecheck
+        entry: bun run --cwd ui typecheck
+        language: system
+        files: ^ui/
+        pass_filenames: false
 
   # zizmor detects security vulnerabilities in GitHub Actions workflows.
   # Additional configuration for the tool is found in `.github/zizmor.yml`
