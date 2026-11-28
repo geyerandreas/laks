@@ -16,7 +16,10 @@ use std::collections::HashMap;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::registry::ResponseFormat;
+use crate::{
+    registry::ResponseFormat,
+    routes::error::{ProblemDetails, RegistryError},
+};
 
 /// Creates the registry routes
 pub fn create_routes() -> OpenApiRouter<AppState> {
@@ -87,6 +90,16 @@ struct ProjectDetailsJson {
                 (String = "text/html"),
                 (ProjectDetailsJson = "application/vnd.pypi.simple.v1+json")
             )
+        ),
+        (
+            status = 404,
+            description = "Project not found",
+            body = ProblemDetails
+        ),
+        (
+            status = 500,
+            description = "Internal server error",
+            body = ProblemDetails
         )
     )
 )]
@@ -94,22 +107,18 @@ async fn get_project(
     State(state): State<AppState>,
     Path(project): Path<String>,
     request: Request,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, RegistryError> {
     let normalized = normalize_name(&project);
 
     let package = match laks_db::registry::get_package(&state.pool, &normalized).await {
         Ok(package) => package,
-        Err(sqlx::Error::RowNotFound) => return StatusCode::NOT_FOUND.into_response(),
-        Err(error) => {
-            tracing::error!(%error, package = %normalized, "failed to load package");
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-        }
+        Err(sqlx::Error::RowNotFound) => return Err(RegistryError::ProjectNotFound(normalized)),
+        Err(error) => return Err(RegistryError::Internal(anyhow::Error::new(error))),
     };
     let files = match laks_db::registry::get_package_files(&state.pool, package.id).await {
         Ok(files) => files,
         Err(error) => {
-            tracing::error!(%error, package = %normalized, "failed to load package files");
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+            return Err(RegistryError::Internal(anyhow::Error::new(error)));
         }
     };
 
@@ -130,11 +139,12 @@ async fn get_project(
                 .map(|file| PackageFileJson::from_package_file(file, &normalized))
                 .collect(),
         };
-        (
+        Ok((
+            StatusCode::OK,
             [(header::CONTENT_TYPE, "application/vnd.pypi.simple.v1+json")],
             Json(response_json),
         )
-            .into_response()
+            .into_response())
     } else {
         let links = files
             .into_iter()
@@ -165,11 +175,12 @@ async fn get_project(
 </body>
 </html>"#
         );
-        (
+        Ok((
+            StatusCode::OK,
             [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
             html_content,
         )
-            .into_response()
+            .into_response())
     }
 }
 
@@ -187,10 +198,10 @@ async fn list_projects(
     State(state): State<AppState>,
     format: ResponseFormat,
     original_uri: OriginalUri,
-) -> Result<Response, StatusCode> {
+) -> Result<impl IntoResponse, RegistryError> {
     let projects: Vec<String> = laks_db::registry::get_packages(&state.pool)
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|err| RegistryError::Internal(anyhow::Error::new(err)))?;
 
     match format {
         ResponseFormat::Json => {
@@ -208,7 +219,7 @@ async fn list_projects(
                 CONTENT_TYPE,
                 "application/vnd.pypi.simple.v1+json".parse().unwrap(),
             );
-            Ok((headers, Json(body)).into_response())
+            Ok((StatusCode::OK, headers, Json(body)).into_response())
         }
         ResponseFormat::Html => {
             let mut html = String::from("<!DOCTYPE html><html><body>\n");
@@ -221,7 +232,12 @@ async fn list_projects(
                 ));
             }
             html.push_str("</body></html>");
-            Ok(Html(html).into_response())
+            Ok((
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+                Html(html),
+            )
+                .into_response())
         }
     }
 }

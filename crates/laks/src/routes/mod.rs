@@ -16,6 +16,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::AppState;
 mod auth;
+mod error;
 mod health;
 mod registry;
 mod user;
