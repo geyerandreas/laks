@@ -1,24 +1,26 @@
 use crate::error::Result;
 use laks_auth::password::hash_password;
+use laks_common::account_name::UserName;
 use laks_settings::setup::Setup;
 use serde::Deserialize;
 use sqlx::Error;
 use sqlx::SqlitePool;
 use sqlx::prelude::*;
+
 use utoipa::ToSchema;
 
 #[derive(Debug, FromRow)]
 pub struct User {
     pub id: i32,
     pub email: String,
-    pub name: String,
+    pub name: UserName,
     pub password_hash: String,
     pub is_admin: bool,
 }
 
 #[derive(Debug)]
 pub struct UserCreate {
-    pub name: String,
+    pub name: UserName,
     pub email: String,
     pub password: String,
     pub is_admin: bool,

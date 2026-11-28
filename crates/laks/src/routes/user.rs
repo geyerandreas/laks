@@ -2,6 +2,7 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use laks_appstate::AppState;
+use laks_common::account_name::UserName;
 use laks_db::users::{User, UserUpdate};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
@@ -30,7 +31,7 @@ impl From<User> for UserPublic {
     fn from(value: User) -> Self {
         Self {
             email: value.email,
-            name: value.name,
+            name: value.name.into_inner(),
         }
     }
 }
@@ -46,7 +47,7 @@ pub struct UserCreate {
 impl From<UserCreate> for laks_db::users::UserCreate {
     fn from(value: UserCreate) -> Self {
         Self {
-            name: value.name,
+            name: UserName::new(value.name).expect("a valid payload with proper username"), // FIXME: get rid of .expect()
             email: value.email,
             password: value.password,
             is_admin: value.is_admin,

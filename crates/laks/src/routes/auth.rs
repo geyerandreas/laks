@@ -2,6 +2,7 @@ use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use cookie::time::SignedDuration;
 use laks_appstate::AppState;
 use laks_auth::{jwt::JwtService, password::verify_password};
+use laks_common::account_name::UserName;
 use serde::{Deserialize, Serialize};
 use sqlx::{SqlitePool, prelude::FromRow};
 use tower_cookies::{Cookie, Cookies};
@@ -55,7 +56,7 @@ impl From<laks_db::users::User> for RegisterResponse {
     fn from(user: laks_db::users::User) -> Self {
         Self {
             email: user.email,
-            name: user.name,
+            name: user.name.into_inner(),
         }
     }
 }
@@ -162,7 +163,7 @@ async fn register(
         &pool,
         &laks_db::users::UserCreate {
             is_admin: false,
-            name: payload.name,
+            name: UserName::new(payload.name).expect("a valid payload with proper username"), // FIXME: get rid of .expect()
             email: payload.email,
             password: payload.password,
         },

@@ -1,3 +1,5 @@
+pub mod account_name;
+
 /// Normalze name
 /// See PEP 503 and 508
 pub fn normalize_name(name: &str) -> String {
